@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .warning {
+            color: red;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+        }
+        .warning-icon {
+            display: inline-block;
+            vertical-align: middle;
+            width: 24px;
+            height: 24px;
+            background-image: url('/WebResources/new_WarningIcon'); 
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin-right: 5px; 
+            margin-top: -5px; 
+        }
+    </style>
+</head>
+<body>
+    <div id="warning-message" class="warning" style="display: none;">
+        <span class="warning-icon"></span>
+        Warning - Inventory Running Low! Please place an order to replenish stock.
+    </div>
+</body>
+</html>
