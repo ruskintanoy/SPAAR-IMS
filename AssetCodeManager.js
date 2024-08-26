@@ -191,34 +191,37 @@ function onSaveAssetForm(executionContext) {
     var categoryValue = categoryNameAttribute.getValue();
     var categoryId = categoryValue[0].id.replace("{", "").replace("}", "");
 
+    // Check if the client is Web (Desktop)
+    var clientType = Xrm.Utility.getGlobalContext().client.getClient();
+
     if (!isManualAssetCode) {
         if (categoryId === initialCategory && assetCode !== initialAssetCode) {
-            // If category is the same as initial and asset code is different, restore initial asset code
             formContext.getAttribute("cr4d3_assetcode").setValue(initialAssetCode);
             console.log("Asset code restored to initial value during save:", initialAssetCode);
         } else if (!assetCode) {
-            // Generate asset code if not already set
             generateAssetCode(formContext).then(
                 function() {
                     console.log("Asset code generated during save");
-                    // Only call print function if the asset code was generated or changed
-                    printAssetCode(formContext);
+                    if (clientType === "Web") {
+                        printAssetCode(formContext);
+                    }
                 },
                 function(error) {
                     console.error("Error during asset code generation during save:", error);
                 }
             );
         } else if (assetCode !== initialAssetCode) {
-            // If asset code was changed, call the print function
             console.log("Asset code changed during save");
-            printAssetCode(formContext);
+            if (clientType === "Web") {
+                printAssetCode(formContext);
+            }
         }
     } else {
         console.log("Manual asset code entry detected during save. Skipping auto-generation.");
-        // Reset manual entry flag after save
         isManualAssetCode = false;
     }
 }
+
 
 function beforeFormSubmit(executionContext) {
     var formContext = executionContext.getFormContext();
