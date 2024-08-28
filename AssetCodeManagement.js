@@ -1,31 +1,3 @@
-let initialAssetCode = null;
-let initialCategory = null;
-let isManualAssetCode = false; // Flag to detect manual asset code entry
-
-function onLoadAssetFormAssetCode(executionContext) {
-    console.log("onLoadAssetFormAssetCode function called");
-
-    var formContext = executionContext.getFormContext();
-    var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode");
-    var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
-
-    // Capture initial Asset Code and Category ID
-    if (assetCodeAttribute && categoryNameAttribute) {
-        initialAssetCode = assetCodeAttribute.getValue();
-        var categoryValue = categoryNameAttribute.getValue();
-        if (categoryValue && categoryValue.length > 0) {
-            initialCategory = categoryValue[0].id.replace("{", "").replace("}", "");
-        }
-
-        console.log("Initial asset code:", initialAssetCode);
-        console.log("Initial category:", initialCategory);
-
-        // Attach event handler for manual entry detection
-        assetCodeAttribute.addOnChange(onAssetCodeChange);
-        categoryNameAttribute.addOnChange(onCategoryChange);
-    }
-}
-
 function onCategoryChange(executionContext) {
     console.log("onCategoryChange function called");
 
@@ -114,7 +86,7 @@ function generateAssetCode(formContext, reset = false) {
                             nextSequenceNumber = "001";
                             console.log("No previous asset codes found. Starting sequence at 001.");
                         }
-                        
+
                         // Combine prefix and sequence number to form new asset code
                         var newAssetCode = categoryPrefix + nextSequenceNumber;
 
@@ -136,102 +108,4 @@ function generateAssetCode(formContext, reset = false) {
             }
         );
     });
-}
-
-function onAssetCodeChange(executionContext) {
-    console.log("onAssetCodeChange function called");
-
-    var formContext = executionContext.getFormContext();
-    var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
-
-    if (assetCode && assetCode !== initialAssetCode) {
-        isManualAssetCode = true;
-        console.log("Manual asset code entry detected:", assetCode);
-    }
-}
-
-function onSaveAssetFormAssetCode(executionContext) {
-    console.log("onSaveAssetFormAssetCode function called");
-
-    var formContext = executionContext.getFormContext();
-    var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
-    
-    var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
-    var categoryValue = categoryNameAttribute.getValue();
-    var categoryId = categoryValue[0].id.replace("{", "").replace("}", "");
-
-    // Check if the client is Web (Desktop)
-    var clientType = Xrm.Utility.getGlobalContext().client.getClient();
-
-    if (!isManualAssetCode) {
-        if (categoryId === initialCategory && assetCode !== initialAssetCode) {
-            formContext.getAttribute("cr4d3_assetcode").setValue(initialAssetCode);
-            console.log("Asset code restored to initial value during save:", initialAssetCode);
-        } else if (!assetCode) {
-            generateAssetCode(formContext).then(
-                function() {
-                    console.log("Asset code generated during save");
-                    if (clientType === "Web") {
-                        printAssetCode(formContext);
-                    }
-                },
-                function(error) {
-                    console.error("Error during asset code generation during save:", error);
-                }
-            );
-        } else if (assetCode !== initialAssetCode) {
-            console.log("Asset code changed during save");
-            if (clientType === "Web") {
-                printAssetCode(formContext);
-            }
-        }
-    } else {
-        console.log("Manual asset code entry detected during save. Skipping auto-generation.");
-        isManualAssetCode = false;
-    }
-}
-
-function printAssetCode(formContext) {
-    console.log("printAssetCode function called");
-    var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
-    if (assetCode) {
-        console.log("Printing asset code:", assetCode);
-        var printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Print Asset Code</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        text-align: center;
-                        margin-top: 10px;
-                    }
-                    h1 {
-                        font-size: 14px;
-                    }
-                    p {
-                        font-size: 10px;
-                    }
-                    @media print {
-                        @page {
-                            margin: 0;
-                        }
-                        body {
-                            margin: 1.6cm;
-                        }
-                    }
-                </style>
-            </head>
-                <body>
-                    <h1>Asset Code</h1>
-                    <p>${assetCode}</p>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
-    } else {
-        console.error("No asset code found to print.");
-    }
 }
