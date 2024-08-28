@@ -1,7 +1,6 @@
-// Web resource: cr4d3_combinedScript.js
-
 let initialAssetCode = null;
 let initialCategory = null;
+let initialStatus = null; // To store the initial status GUID
 let isManualAssetCode = false; // Flag to detect manual asset code entry
 
 function onLoadAssetForm(executionContext) {
@@ -10,52 +9,61 @@ function onLoadAssetForm(executionContext) {
     var formContext = executionContext.getFormContext();
     var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode");
     var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
+    var statusAttribute = formContext.getAttribute("cr4d3_status");
 
-    // Capture initial Asset Code and Category ID
-    if (assetCodeAttribute && categoryNameAttribute) {
+    // Capture initial Asset Code, Category ID, and Status ID
+    if (assetCodeAttribute && categoryNameAttribute && statusAttribute) {
         initialAssetCode = assetCodeAttribute.getValue();
         var categoryValue = categoryNameAttribute.getValue();
         if (categoryValue && categoryValue.length > 0) {
             initialCategory = categoryValue[0].id.replace("{", "").replace("}", "");
         }
 
+        var statusValue = statusAttribute.getValue();
+        if (statusValue && statusValue.length > 0) {
+            initialStatus = statusValue[0].id.replace("{", "").replace("}", "");
+        }
+
         console.log("Initial asset code:", initialAssetCode);
         console.log("Initial category:", initialCategory);
+        console.log("Initial status:", initialStatus);
 
-        // Attach event handler for manual entry detection
+        // Attach event handlers
         assetCodeAttribute.addOnChange(onAssetCodeChange);
+        categoryNameAttribute.addOnChange(onCategoryChange);
+        statusAttribute.addOnChange(onStatusChange); // Attach handler for status change
     }
-
-    // Call the function to manage the Previous Status logic
-    managePreviousStatus(formContext);
 }
 
-function managePreviousStatus(formContext) {
-    console.log("managePreviousStatus function called");
+// Function to handle the status change and update the previous status field
+function onStatusChange(executionContext) {
+    console.log("onStatusChange function called");
 
-    // Get the current value of the Device Status lookup field (assuming single value lookup)
-    var currentStatusLookup = formContext.getAttribute("cr4d3_status").getValue();
+    var formContext = executionContext.getFormContext();
+    var statusAttribute = formContext.getAttribute("cr4d3_status");
+    var previousStatusAttribute = formContext.getAttribute("new_previousstatus");
 
-    // Initialize currentStatus as an empty string
-    var currentStatus = "";
-
-    // Extract the GUID from the lookup value if it's not null
-    if (currentStatusLookup !== null && currentStatusLookup.length > 0) {
-        currentStatus = currentStatusLookup[0].id; // Extracting the GUID
-        currentStatus = currentStatus.replace("{", "").replace("}", ""); // Remove curly brackets
-        currentStatus = currentStatus.toLowerCase(); // Convert to lowercase
+    if (!statusAttribute || !previousStatusAttribute) {
+        console.error("Status or Previous Status attribute not found.");
+        return;
     }
 
-    // Get the value of the Previous Status
-    var previousStatus = formContext.getAttribute("new_previousstatus").getValue();
+    // Get the current status value
+    var currentStatusLookup = statusAttribute.getValue();
+    var currentStatus = "";
 
-    // If Previous Status is not already set or differs from the current status, populate it
-    if (previousStatus === null || previousStatus === "" || previousStatus !== currentStatus) {
-        formContext.getAttribute("new_previousstatus").setValue(currentStatus);
+    if (currentStatusLookup !== null && currentStatusLookup.length > 0) {
+        currentStatus = currentStatusLookup[0].id.replace("{", "").replace("}", "").toLowerCase();
+    }
+
+    // Update the Previous Status field
+    if (previousStatusAttribute.getValue() !== currentStatus) {
+        previousStatusAttribute.setValue(currentStatus);
         console.log("Previous status updated to:", currentStatus);
     }
 }
 
+// Other functions remain unchanged...
 function onCategoryChange(executionContext) {
     console.log("onCategoryChange function called");
 
@@ -281,4 +289,3 @@ function registerEvents(executionContext) {
     formContext.ui.addOnLoad(onLoadAssetForm); // Handles both asset code and previous status
     formContext.data.entity.addOnSave(onSaveAssetForm); // Handles both asset code generation and previous status on save
 }
-
