@@ -26,8 +26,8 @@ function onLoadAssetForm(executionContext) {
         assetCodeAttribute.addOnChange(onAssetCodeChange);
     }
 
-    // Call the function to manage the Previous Status logic on load
-    managePreviousStatus(formContext);  // Moved to onLoad to capture the old status
+    // Call the function to manage the Previous Status, Model, and Category logic on load
+    managePreviousFields(formContext);  // Now handles multiple "Previous" fields
 }
 
 function onSaveAssetForm(executionContext) {
@@ -80,5 +80,40 @@ function onAssetCodeChange(executionContext) {
     if (assetCode && assetCode !== initialAssetCode) {
         isManualAssetCode = true;
         console.log("Manual asset code entry detected:", assetCode);
+    }
+}
+
+// New function to manage Previous Status, Model, and Category fields
+function managePreviousFields(formContext) {
+    console.log("managePreviousFields function called");
+
+    // Handle Previous Status
+    var currentStatusLookup = formContext.getAttribute("cr4d3_status").getValue();
+    var currentStatus = currentStatusLookup ? currentStatusLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousStatus = formContext.getAttribute("new_previousstatus").getValue();
+
+    if (!previousStatus || previousStatus !== currentStatus) {
+        formContext.getAttribute("new_previousstatus").setValue(currentStatus);
+        console.log("Previous status updated to:", currentStatus);
+    }
+
+    // Handle Previous Model
+    var currentModelLookup = formContext.getAttribute("cr4d3_model").getValue();
+    var currentModel = currentModelLookup ? currentModelLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousModel = formContext.getAttribute("new_previousmodel").getValue();
+
+    if (!previousModel || previousModel !== currentModel) {
+        formContext.getAttribute("new_previousmodel").setValue(currentModel);
+        console.log("Previous model updated to:", currentModel);
+    }
+
+    // Handle Previous Category
+    var currentCategoryLookup = formContext.getAttribute("cr4d3_category").getValue();
+    var currentCategory = currentCategoryLookup ? currentCategoryLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousCategory = formContext.getAttribute("new_previouscategory").getValue();
+
+    if (!previousCategory || previousCategory !== currentCategory) {
+        formContext.getAttribute("new_previouscategory").setValue(currentCategory);
+        console.log("Previous category updated to:", currentCategory);
     }
 }
