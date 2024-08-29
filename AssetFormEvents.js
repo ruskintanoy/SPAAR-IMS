@@ -26,7 +26,7 @@ function onLoadAssetForm(executionContext) {
         assetCodeAttribute.addOnChange(onAssetCodeChange);
     }
 
-    // Call the function to manage the Previous Status, Model, and Category logic on load
+    // Call the function to manage the Previous fields logic on load
     managePreviousFields(formContext);  // Now handles multiple "Previous" fields
 }
 
@@ -83,7 +83,7 @@ function onAssetCodeChange(executionContext) {
     }
 }
 
-// New function to manage Previous Status, Model, and Category fields
+// Extended function to manage Previous Status, Model, Category, and User fields
 function managePreviousFields(formContext) {
     console.log("managePreviousFields function called");
 
@@ -115,5 +115,15 @@ function managePreviousFields(formContext) {
     if (!previousCategory || previousCategory !== currentCategory) {
         formContext.getAttribute("new_previouscategory").setValue(currentCategory);
         console.log("Previous category updated to:", currentCategory);
+    }
+
+    // Handle Previous User
+    var currentUserLookup = formContext.getAttribute("new_assignedto").getValue();
+    var currentUser = currentUserLookup ? currentUserLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousUser = formContext.getAttribute("new_previoususer").getValue();
+
+    if (!previousUser || previousUser !== currentUser) {
+        formContext.getAttribute("new_previoususer").setValue(currentUser);
+        console.log("Previous user updated to:", currentUser);
     }
 }
