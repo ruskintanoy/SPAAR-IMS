@@ -1,4 +1,3 @@
-
 function managePreviousStatus(formContext) {
     console.log("managePreviousStatus function called");
 
@@ -22,5 +21,42 @@ function managePreviousStatus(formContext) {
     if (previousStatus === null || previousStatus === "" || previousStatus !== currentStatus) {
         formContext.getAttribute("new_previousstatus").setValue(currentStatus);
         console.log("Previous status updated to:", currentStatus);
+    }
+}
+
+function managePreviousFields(formContext) {
+    console.log("managePreviousFields function called");
+
+    // Handle Previous Status
+    managePreviousStatus(formContext);
+
+    // Handle Previous Model
+    var currentModelLookup = formContext.getAttribute("cr4d3_model").getValue();
+    var currentModel = currentModelLookup ? currentModelLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousModel = formContext.getAttribute("new_previousmodel").getValue();
+
+    if (!previousModel || previousModel !== currentModel) {
+        formContext.getAttribute("new_previousmodel").setValue(currentModel);
+        console.log("Previous model updated to:", currentModel);
+    }
+
+    // Handle Previous Category
+    var currentCategoryLookup = formContext.getAttribute("cr4d3_category").getValue();
+    var currentCategory = currentCategoryLookup ? currentCategoryLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousCategory = formContext.getAttribute("new_previouscategory").getValue();
+
+    if (!previousCategory || previousCategory !== currentCategory) {
+        formContext.getAttribute("new_previouscategory").setValue(currentCategory);
+        console.log("Previous category updated to:", currentCategory);
+    }
+
+    // Handle Previous User
+    var currentUserLookup = formContext.getAttribute("new_assignedto").getValue();
+    var currentUser = currentUserLookup ? currentUserLookup[0].id.replace("{", "").replace("}", "").toLowerCase() : "";
+    var previousUser = formContext.getAttribute("new_previoususer").getValue();
+
+    if (!previousUser || previousUser !== currentUser) {
+        formContext.getAttribute("new_previoususer").setValue(currentUser);
+        console.log("Previous user updated to:", currentUser);
     }
 }

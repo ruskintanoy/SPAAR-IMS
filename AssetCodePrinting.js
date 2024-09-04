@@ -1,5 +1,3 @@
-// cr4d3_printAssetCode.js
-
 function printAssetCode(formContext) {
     console.log("printAssetCode function called");
     var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
