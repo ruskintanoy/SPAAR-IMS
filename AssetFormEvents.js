@@ -26,12 +26,6 @@ function onLoadAssetForm(executionContext) {
 
     // Call the function to manage the Previous fields logic on load
     managePreviousFields(formContext);  // Now handles multiple "Previous" fields
-
-    // Set placeholder for Device Identifier
-    setDeviceIdentifierPlaceholder(executionContext); // Call placeholder function on load
-
-    // Attach event handler for when the Category changes
-    formContext.getAttribute("cr4d3_category").addOnChange(setDeviceIdentifierPlaceholder);
 }
 
 function onSaveAssetForm(executionContext) {
@@ -133,53 +127,3 @@ function onAssetCodeChange(executionContext) {
         console.log("Manual asset code entry detected:", assetCode);
     }
 }
-
-// Function to set the Device Identifier field's placeholder based on the Category
-function setDeviceIdentifierPlaceholder(executionContext) {
-    var formContext = executionContext.getFormContext();
-
-    // Get the Category field and its value
-    var categoryLookup = formContext.getAttribute("cr4d3_category").getValue();
-
-    if (!categoryLookup || categoryLookup.length === 0) {
-        // If no category is selected, do nothing
-        return;
-    }
-
-    // Retrieve the category ID
-    var categoryId = categoryLookup[0].id.replace("{", "").replace("}", "").toLowerCase();
-
-    // Get the Device Identifier (previously IMEI) field (logical name is cr4d3_serialnumber)
-    var deviceIdentifierControl = formContext.getControl("cr4d3_serialnumber");
-    var deviceIdentifierAttribute = formContext.getAttribute("cr4d3_serialnumber"); // Get the attribute for setting required level
-
-    // Phone and Phone Numbers category GUIDs
-    var phonesCategoryId = "efe77273-eca2-451e-b97a-10f2428c6109";  // GUID for Phones category
-    var phoneNumbersCategoryId = "aab542c8-004a-ef11-a317-000d3a989566";  // GUID for Phone Numbers category
-
-    // Clear any previous notifications
-    deviceIdentifierControl.clearNotification();
-
-    // Set placeholder and behavior based on category
-    if (categoryId === phonesCategoryId) {
-        deviceIdentifierControl.setLabel("Device Identifier");  // Change label to "Device Identifier"
-        deviceIdentifierControl.setVisible(true);  // Make sure the field is visible
-        deviceIdentifierControl.setDisabled(false); // Enable the field
-        //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
-        deviceIdentifierControl.setNotification("Enter IMEI", "placeholder");
-    } else if (categoryId === phoneNumbersCategoryId) {
-        // Disable and hide the field for "Phone Numbers" category
-        deviceIdentifierControl.setDisabled(true);  // Disable the field
-        deviceIdentifierControl.setVisible(false);  // Optionally hide the field
-        //deviceIdentifierAttribute.setRequiredLevel("none"); // Make field not required
-        deviceIdentifierControl.clearNotification(); // Clear any placeholder
-    } else {
-        // For other categories, use Serial Number
-        deviceIdentifierControl.setLabel("Device Identifier");
-        deviceIdentifierControl.setVisible(true);  // Make sure the field is visible
-        deviceIdentifierControl.setDisabled(false); // Enable the field
-        //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
-        deviceIdentifierControl.setNotification("Enter Serial Number", "placeholder");
-    }
-}
-
