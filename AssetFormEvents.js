@@ -153,15 +153,17 @@ function setDeviceIdentifierPlaceholder(executionContext) {
     var deviceIdentifierControl = formContext.getControl("cr4d3_serialnumber");
     var deviceIdentifierAttribute = formContext.getAttribute("cr4d3_serialnumber"); // Get the attribute for setting required level
 
-    // Phone and Phone Numbers category GUIDs
+    // Phone, Tablet, and Phone Numbers category GUIDs
     var phonesCategoryId = "efe77273-eca2-451e-b97a-10f2428c6109";  // GUID for Phones category
+    var tabletsCategoryId = "831501ac-7e6c-ef11-a671-6045bda8d109";  // GUID for Tablets category (you'll need to replace this)
     var phoneNumbersCategoryId = "aab542c8-004a-ef11-a317-000d3a989566";  // GUID for Phone Numbers category
 
     // Clear any previous notifications
     deviceIdentifierControl.clearNotification();
 
     // Set label and behavior based on category
-    if (categoryId === phonesCategoryId) {
+    if (categoryId === phonesCategoryId || categoryId === tabletsCategoryId) {
+        // For both Phones and Tablets, show "Enter IMEI"
         deviceIdentifierControl.setLabel("Device Identifier (Enter IMEI)");  // Update label to indicate IMEI is expected
         deviceIdentifierControl.setVisible(true);  // Make sure the field is visible
         deviceIdentifierControl.setDisabled(false); // Enable the field
@@ -170,7 +172,7 @@ function setDeviceIdentifierPlaceholder(executionContext) {
         // Disable and hide the field for "Phone Numbers" category
         deviceIdentifierControl.setDisabled(true);  // Disable the field
         deviceIdentifierControl.setVisible(false);  // Optionally hide the field
-        deviceIdentifierAttribute.setRequiredLevel("none"); // Make field not required
+        //deviceIdentifierAttribute.setRequiredLevel("none"); // Make field not required
         deviceIdentifierControl.clearNotification(); // Clear any error or validation message
     } else {
         // For other categories, use Serial Number
@@ -180,6 +182,7 @@ function setDeviceIdentifierPlaceholder(executionContext) {
         //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
     }
 }
+
 
 
 
