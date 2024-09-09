@@ -38,24 +38,39 @@ function printAssetCode(formContext) {
         `);
         printWindow.document.close();
 
-        // Wait for the print window to fully load before triggering print
+        // Focus the print window to ensure it loads properly
         printWindow.focus();
+
+        // Set a flag to track whether the print dialog was used
+        var printActionTriggered = false;
+
+        // Trigger the print dialog
         printWindow.print();
 
-        // Implement a timeout to check if the print window is closed
+        // Detect when the print dialog is closed, or the print window is closed
+        printWindow.onafterprint = function () {
+            console.log("Print action completed.");
+            printActionTriggered = true;
+            printWindow.close();
+        };
+
+        // Check if the window was closed directly without printing
         var printCheckInterval = setInterval(function () {
             if (printWindow.closed) {
-                console.log("Print window closed.");
+                console.log("Print window closed directly by the user.");
                 clearInterval(printCheckInterval);
-                // Restore functionality in your app or perform any necessary cleanup here
+
+                if (!printActionTriggered) {
+                    console.log("Print dialog was bypassed (window closed directly).");
+                    // Perform necessary cleanup actions if the window was closed directly
+                }
             }
         }, 500);
 
-        // Ensure the window is closed after printing or if the user directly closes the tab
-        printWindow.onafterprint = function () {
-            console.log("Print action completed.");
-            printWindow.close();
-            clearInterval(printCheckInterval); // Clear the interval if the window is closed properly
+        // Event listener to catch the direct closure of the window
+        printWindow.onbeforeunload = function () {
+            clearInterval(printCheckInterval);
+            console.log("Print window unloaded or closed.");
         };
     } else {
         console.error("No asset code found to print.");
