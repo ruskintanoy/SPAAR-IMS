@@ -37,7 +37,26 @@ function printAssetCode(formContext) {
             </html>
         `);
         printWindow.document.close();
+
+        // Wait for the print window to fully load before triggering print
+        printWindow.focus();
         printWindow.print();
+
+        // Implement a timeout to check if the print window is closed
+        var printCheckInterval = setInterval(function () {
+            if (printWindow.closed) {
+                console.log("Print window closed.");
+                clearInterval(printCheckInterval);
+                // Restore functionality in your app or perform any necessary cleanup here
+            }
+        }, 500);
+
+        // Ensure the window is closed after printing or if the user directly closes the tab
+        printWindow.onafterprint = function () {
+            console.log("Print action completed.");
+            printWindow.close();
+            clearInterval(printCheckInterval); // Clear the interval if the window is closed properly
+        };
     } else {
         console.error("No asset code found to print.");
     }
