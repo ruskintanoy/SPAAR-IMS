@@ -153,9 +153,12 @@ function setDeviceIdentifierPlaceholder(executionContext) {
     var deviceIdentifierControl = formContext.getControl("cr4d3_serialnumber");
     var deviceIdentifierAttribute = formContext.getAttribute("cr4d3_serialnumber"); // Get the attribute for setting required level
 
+    // Get the Model field control (assuming logical name is cr4d3_model)
+    var modelControl = formContext.getControl("cr4d3_model");
+
     // Phone, Tablet, and Phone Numbers category GUIDs
     var phonesCategoryId = "efe77273-eca2-451e-b97a-10f2428c6109";  // GUID for Phones category
-    var tabletsCategoryId = "831501ac-7e6c-ef11-a671-6045bda8d109";  // GUID for Tablets category (you'll need to replace this)
+    var tabletsCategoryId = "831501ac-7e6c-ef11-a671-6045bda8d109";  // GUID for Tablets category
     var phoneNumbersCategoryId = "aab542c8-004a-ef11-a317-000d3a989566";  // GUID for Phone Numbers category
 
     // Clear any previous notifications
@@ -168,12 +171,18 @@ function setDeviceIdentifierPlaceholder(executionContext) {
         deviceIdentifierControl.setVisible(true);  // Make sure the field is visible
         deviceIdentifierControl.setDisabled(false); // Enable the field
         //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
+
+
     } else if (categoryId === phoneNumbersCategoryId) {
         // Disable and hide the field for "Phone Numbers" category
         deviceIdentifierControl.setDisabled(true);  // Disable the field
         deviceIdentifierControl.setVisible(false);  // Optionally hide the field
         //deviceIdentifierAttribute.setRequiredLevel("none"); // Make field not required
         deviceIdentifierControl.clearNotification(); // Clear any error or validation message
+
+        // Change the label of the Model field for Phone Numbers
+        modelControl.setLabel("Phone Number");
+
     } else {
         // For other categories, use Serial Number
         deviceIdentifierControl.setLabel("Device Identifier (Enter Serial Number)");  // Update label to indicate Serial Number is expected
@@ -182,6 +191,7 @@ function setDeviceIdentifierPlaceholder(executionContext) {
         //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
     }
 }
+
 
 
 
