@@ -176,7 +176,7 @@ function setDeviceIdentifierPlaceholder(executionContext) {
     } else if (categoryId === phoneNumbersCategoryId) {
         // Disable and hide the field for "Phone Numbers" category
         deviceIdentifierControl.setDisabled(true);  // Disable the field
-        deviceIdentifierControl.setVisible(false);  // Optionally hide the field
+        deviceIdentifierControl.setVisible(false);  // hide the field
         //deviceIdentifierAttribute.setRequiredLevel("none"); // Make field not required
         deviceIdentifierControl.clearNotification(); // Clear any error or validation message
 
