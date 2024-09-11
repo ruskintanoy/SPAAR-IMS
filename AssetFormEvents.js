@@ -1,6 +1,6 @@
 let initialAssetCode = null;
 let initialCategory = null;
-let isManualAssetCode = false; // Declare globally
+let isManualAssetCode = false; 
 
 function onLoadAssetForm(executionContext) {
     console.log("onLoadAssetForm function called");
@@ -9,7 +9,7 @@ function onLoadAssetForm(executionContext) {
     var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode");
     var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
 
-    // Capture initial Asset Code and Category ID
+    // Get initial Asset Code and Category ID
     if (assetCodeAttribute && categoryNameAttribute) {
         initialAssetCode = assetCodeAttribute.getValue();
         var categoryValue = categoryNameAttribute.getValue();
@@ -20,15 +20,15 @@ function onLoadAssetForm(executionContext) {
         console.log("Initial asset code:", initialAssetCode);
         console.log("Initial category:", initialCategory);
 
-        // Attach event handler for manual entry detection
+        // Handler for manual entry detection
         assetCodeAttribute.addOnChange(onAssetCodeChange);
     }
 
-    // Call the function to manage the Previous fields logic on load
-    managePreviousFields(formContext);  // Now handles multiple "Previous" fields
+    // Function to handle the "previous fields" on load
+    managePreviousFields(formContext);  
 
     // Set placeholder for Device Identifier
-    setDeviceIdentifierPlaceholder(executionContext); // Call placeholder function on load
+    setDeviceIdentifierPlaceholder(executionContext); 
 
     // Attach event handler for when the Category changes
     formContext.getAttribute("cr4d3_category").addOnChange(setDeviceIdentifierPlaceholder);
@@ -39,7 +39,7 @@ function onSaveAssetForm(executionContext) {
 
     var formContext = executionContext.getFormContext();
     
-    // Validate that Assigned To is not empty when Status is "Assigned"
+    // Check the Assigned To field if it is not empty when Status is "Assigned"
     if (!validateAssignedTo(formContext)) {
         // Prevent the form from saving if validation fails
         executionContext.getEventArgs().preventDefault();
@@ -95,7 +95,7 @@ function onSaveAssetForm(executionContext) {
     }
 }
 
-// Validation function to ensure Assigned To is set when Device Status is "Assigned"
+// Validation function to make sure Assigned To column is set when Device Status is "Assigned"
 function validateAssignedTo(formContext) {
     var statusAttribute = formContext.getAttribute("cr4d3_status");
     var assignedToAttribute = formContext.getAttribute("new_assignedto");
@@ -108,7 +108,7 @@ function validateAssignedTo(formContext) {
     if (statusValue && statusValue[0].name === "Assigned") {
         // If "Assigned", make sure Assigned To is not empty
         if (!assignedToValue) {
-            // Show an error notification
+            // Error notification
             formContext.ui.setFormNotification("The 'Assigned To' field cannot be empty when 'Device Status' is set to 'Assigned'. Please provide a valid assignee.", "ERROR", "assignedToError");
 
             console.error("Assigned To is empty while Device Status is 'Assigned'.");
@@ -146,20 +146,20 @@ function setDeviceIdentifierPlaceholder(executionContext) {
         return;
     }
 
-    // Retrieve the category ID
+    // Get the category ID
     var categoryId = categoryLookup[0].id.replace("{", "").replace("}", "").toLowerCase();
 
-    // Get the Device Identifier (previously IMEI) field (logical name is cr4d3_serialnumber)
+    // Get the Device Identifier 
     var deviceIdentifierControl = formContext.getControl("cr4d3_serialnumber");
-    var deviceIdentifierAttribute = formContext.getAttribute("cr4d3_serialnumber"); // Get the attribute for setting required level
+    // var deviceIdentifierAttribute = formContext.getAttribute("cr4d3_serialnumber"); // Get the attribute for setting required level
 
-    // Get the Model field control (assuming logical name is cr4d3_model)
+    // Get the Model field control
     var modelControl = formContext.getControl("cr4d3_model");
 
     // Phone, Tablet, and Phone Numbers category GUIDs
-    var phonesCategoryId = "efe77273-eca2-451e-b97a-10f2428c6109";  // GUID for Phones category
-    var tabletsCategoryId = "831501ac-7e6c-ef11-a671-6045bda8d109";  // GUID for Tablets category
-    var phoneNumbersCategoryId = "aab542c8-004a-ef11-a317-000d3a989566";  // GUID for Phone Numbers category
+    var phonesCategoryId = "efe77273-eca2-451e-b97a-10f2428c6109";  
+    var tabletsCategoryId = "831501ac-7e6c-ef11-a671-6045bda8d109";  
+    var phoneNumbersCategoryId = "aab542c8-004a-ef11-a317-000d3a989566";  
 
     // Clear any previous notifications
     deviceIdentifierControl.clearNotification();
@@ -167,7 +167,7 @@ function setDeviceIdentifierPlaceholder(executionContext) {
     // Set label and behavior based on category
     if (categoryId === phonesCategoryId || categoryId === tabletsCategoryId) {
         // For both Phones and Tablets, show "Enter IMEI"
-        deviceIdentifierControl.setLabel("Device Identifier (Enter IMEI)");  // Update label to indicate IMEI is expected
+        deviceIdentifierControl.setLabel("Device Identifier (Enter IMEI)");  // Update label 
         deviceIdentifierControl.setVisible(true);  // Make sure the field is visible
         deviceIdentifierControl.setDisabled(false); // Enable the field
         //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
@@ -185,8 +185,8 @@ function setDeviceIdentifierPlaceholder(executionContext) {
 
     } else {
         // For other categories, use Serial Number
-        deviceIdentifierControl.setLabel("Device Identifier (Enter Serial Number)");  // Update label to indicate Serial Number is expected
-        deviceIdentifierControl.setVisible(true);  // Make sure the field is visible
+        deviceIdentifierControl.setLabel("Device Identifier (Enter Serial Number)");  // Update label 
+        deviceIdentifierControl.setVisible(true);  // Make the field visible
         deviceIdentifierControl.setDisabled(false); // Enable the field
         //deviceIdentifierAttribute.setRequiredLevel("required"); // Make field required
     }
