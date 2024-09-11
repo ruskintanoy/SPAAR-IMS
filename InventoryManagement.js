@@ -6,7 +6,7 @@ function updateInventoryOnStatusChange(formContext) {
         var previousStatus = formContext.getAttribute("new_previousstatus").getValue();
         var modelLookup = formContext.getAttribute("cr4d3_model").getValue();
 
-        // Ensure the status and model fields have values
+        // make sure the status and model fields have values
         if (!currentStatusLookup || !modelLookup) {
             return resolve(); // No status or model set, no update necessary
         }
@@ -14,7 +14,7 @@ function updateInventoryOnStatusChange(formContext) {
         var currentStatusId = currentStatusLookup[0].id.replace("{", "").replace("}", "").toLowerCase();
         var modelId = modelLookup[0].id.replace("{", "").replace("}", "").toLowerCase();
 
-        // Map of status GUIDs
+        // status GUIDs
         var statusAssigned = "1de317bd-9a42-4733-b4a0-946b364a5f41";
         var statusStored = "c4b1d5f6-3186-4741-ad01-cc4006a17e3a";
         var statusRetired = "61b39594-75ea-4342-b3ea-5ca29669fcda";
@@ -23,7 +23,7 @@ function updateInventoryOnStatusChange(formContext) {
         var inventoryAdjustment = 0;
         var availableAdjustment = 0;
 
-        // Handling existing asset updates
+        // for updating existing asset record
         if (previousStatus) {
             if (currentStatusId === statusAssigned) {
                 if (previousStatus === statusStored) {
@@ -47,7 +47,7 @@ function updateInventoryOnStatusChange(formContext) {
                 }
             }
         } else {
-            // Handling asset creation
+            // for asset record creation
             if (currentStatusId === statusStored) { // C to S
                 inventoryAdjustment = 1;
                 availableAdjustment = 1;
@@ -57,7 +57,7 @@ function updateInventoryOnStatusChange(formContext) {
         }
 
         if (inventoryAdjustment !== 0 || availableAdjustment !== 0) {
-            // Retrieve the current inventory for the model
+            // Retrieve the current inventory 
             Xrm.WebApi.retrieveRecord("cr4d3_model", modelId, "?$select=cr4d3_inventoryquantity,new_available").then(
                 function success(result) {
                     var currentInventory = result.cr4d3_inventoryquantity || 0;

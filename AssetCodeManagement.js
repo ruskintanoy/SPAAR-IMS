@@ -13,7 +13,7 @@ function onCategoryChange(executionContext) {
     var categoryId = categoryValue[0].id.replace("{", "").replace("}", ""); // Clean the GUID format
 
     if (categoryId !== initialCategory) {
-        // Clear the current asset code to force regeneration
+        // Clear the current asset code 
         formContext.getAttribute("cr4d3_assetcode").setValue(null);
         generateAssetCode(formContext, true).then(
             function() {
@@ -62,13 +62,13 @@ function generateAssetCode(formContext, reset = false) {
         var categoryPrefix = "";
         var nextSequenceNumber = "";
 
-        // Retrieve the category prefix using the category ID
+        // get the category prefix using the category ID
         Xrm.WebApi.retrieveRecord("cr4d3_category", categoryId, "?$select=cr4d3_categoryprefix").then(
             function success(result) {
                 categoryPrefix = result.cr4d3_categoryprefix;
                 console.log("Category prefix:", categoryPrefix);
 
-                // Retrieve the latest asset code
+                // get the latest asset code
                 var assetQuery = `?$filter=_cr4d3_category_value eq ${categoryId}&$orderby=cr4d3_assetcode desc&$top=1`;
                 Xrm.WebApi.retrieveMultipleRecords("cr4d3_asset", assetQuery).then(
                     function success(assetResults) {

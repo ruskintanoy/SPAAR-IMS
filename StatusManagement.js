@@ -1,10 +1,10 @@
 function managePreviousStatus(formContext) {
     console.log("managePreviousStatus function called");
 
-    // Get the current value of the Device Status lookup field (assuming single value lookup)
+    // Get the current value of the Device Status lookup field 
     var currentStatusLookup = formContext.getAttribute("cr4d3_status").getValue();
 
-    // Initialize currentStatus as an empty string
+    // make currentStatus as an empty string
     var currentStatus = "";
 
     // Extract the GUID from the lookup value if it's not null
