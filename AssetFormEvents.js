@@ -53,7 +53,7 @@ function onSaveAssetForm(executionContext) {
         },
         function(error) {
             console.error("Error updating inventory:", error);
-            // Optionally prevent save if inventory update fails
+            // prevent save if inventory update fails
             executionContext.getEventArgs().preventDefault();
         }
     );
