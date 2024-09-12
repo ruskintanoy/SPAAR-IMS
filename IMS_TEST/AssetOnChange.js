@@ -1,4 +1,4 @@
-// AssetFieldChange.js
+// AssetOnChange.js
 
 // To store initial state of category and asset code
 let originalCategoryId = null;
@@ -24,6 +24,9 @@ function onFieldChange(executionContext) {
     // Log the category name for better understanding
     console.log("Category change detected: ", categoryName, " (ID: ", categoryId, ")");
 
+    // Change the field label based on the category selected
+    updateDeviceIdentifierFieldLabel(formContext, categoryName);
+
     // If the category has been changed back to the original, restore the original asset code
     if (originalCategoryId && categoryId === originalCategoryId) {
         console.log("Category restored to original: ", originalCategoryName, ". Restoring original asset code:", originalAssetCode);
@@ -44,6 +47,25 @@ function onFieldChange(executionContext) {
             console.error("Error fetching category prefix for", categoryName, ":", error.message);
         }
     );
+}
+
+// Function to update the device identifier field label based on category
+function updateDeviceIdentifierFieldLabel(formContext, categoryName) {
+    var deviceIdentifierControl = formContext.getControl("cr4d3_serialnumber");
+
+    if (!deviceIdentifierControl) {
+        console.error("Device identifier field not found on form.");
+        return;
+    }
+
+    // Modify the label according to the category
+    if (categoryName === "Laptop" || categoryName === "Desktop") {
+        deviceIdentifierControl.setLabel("Device Identifier (Enter Serial Number)");
+    } else if (categoryName === "Phone" || categoryName === "Tablet") {
+        deviceIdentifierControl.setLabel("Device Identifier (Enter IMEI Number)");
+    } else {
+        deviceIdentifierControl.setLabel("Device Identifier");
+    }
 }
 
 function generateAssetCode(formContext, categoryPrefix) {
