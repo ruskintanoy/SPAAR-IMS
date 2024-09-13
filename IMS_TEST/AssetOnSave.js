@@ -1,7 +1,7 @@
 // AssetOnSave.js
 
 function onSaveAssetForm(executionContext) {
-    console.log("onSaveAssetForm function called");
+    console.log("Saving asset form...");
 
     var formContext = executionContext.getFormContext();
     var assetId = formContext.data.entity.getId(); // Get the record ID
@@ -19,24 +19,26 @@ function onSaveAssetForm(executionContext) {
     if (assetId) {
         successMessage = {
             title: "✅ Asset Updated",
-            text: "Asset updated successfully.\n\nThe asset record has been modified and saved.\n"
+            text: "Asset updated successfully.\nThe asset record has been modified and saved."
         };
+        console.log("Asset updated.");
     } else {
         successMessage = {
             title: "✅ Asset Created",
-            text: "New asset created.\n\nThe asset record has been successfully added to the system.\n"
+            text: "New asset created.\nThe asset record has been added to the system."
         };
+        console.log("New asset created.");
     }
 
-    // Show the alert dialog with improved message and customized message
+    // Show the alert dialog with improved message
     var alertStrings = { confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text };
 
     Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(
         function success() {
-            console.log("Dialog closed successfully.");
+            console.log("Dialog closed.");
         },
         function error() {
-            console.error("Dialog failed to close.");
+            console.error("Error closing dialog.");
         }
     );
 }

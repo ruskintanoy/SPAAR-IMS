@@ -5,7 +5,7 @@ let initialCategory = null;
 let initialCategoryName = null; // Track initial category name for logs
 
 function onLoadAssetForm(executionContext) {
-    console.log("onLoadAssetForm function called");
+    console.log("Asset form loaded.");
 
     var formContext = executionContext.getFormContext();
     var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode");
@@ -23,8 +23,8 @@ function onLoadAssetForm(executionContext) {
             originalCategoryId = initialCategory;
             originalAssetCode = initialAssetCode;
             originalCategoryName = initialCategoryName;
-            console.log(`Initial category: ${initialCategoryName} (ID: ${originalCategoryId})`);
-            console.log("Initial asset code:", originalAssetCode);
+            console.log(`Initial category: ${initialCategoryName}`);
+            console.log(`Initial asset code: ${initialAssetCode}`);
         }
     }
 }
