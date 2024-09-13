@@ -23,7 +23,7 @@ function onSaveAssetForm(executionContext) {
         };
     } else {
         successMessage = {
-            title: "✅ Asset Updated",
+            title: "✅ Asset Created",
             text: "New asset created.\n\nThe asset record has been successfully added to the system.\n"
         };
     }

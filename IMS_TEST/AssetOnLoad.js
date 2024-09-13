@@ -27,7 +27,4 @@ function onLoadAssetForm(executionContext) {
             console.log("Initial asset code:", originalAssetCode);
         }
     }
-
-    // Attach event handler for when the Category changes (onChange)
-    formContext.getAttribute("cr4d3_category").addOnChange(onFieldChange);
 }
