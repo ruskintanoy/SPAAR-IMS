@@ -8,26 +8,35 @@ function onSaveAssetForm(executionContext) {
 
     // Define the dialog options for visual appeal
     var alertOptions = {
-        height: 200,
-        width: 450
+        height: 240,
+        width: 180
     };
 
     // Define message for new or updated asset
-    var successMessage = "";
+    var successMessage = {};
 
     // If assetId exists, it's an update, otherwise, it's a new record
     if (assetId) {
         successMessage = {
             title: "✅ Asset Updated",
-            message: "The asset record has been updated successfully!"
+            text: "Asset updated successfully.\n\nThe asset record has been modified and saved.\n"
         };
     } else {
         successMessage = {
-            title: "✅ Asset Created",
-            message: "The asset record has been created successfully!"
+            title: "✅ Asset Updated",
+            text: "New asset created.\n\nThe asset record has been successfully added to the system.\n"
         };
     }
 
-    // Show the alert dialog with icons and customized message
-    Xrm.Navigation.openAlertDialog(successMessage, alertOptions);
+    // Show the alert dialog with improved message and customized message
+    var alertStrings = { confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text };
+
+    Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(
+        function success() {
+            console.log("Dialog closed successfully.");
+        },
+        function error() {
+            console.error("Dialog failed to close.");
+        }
+    );
 }
