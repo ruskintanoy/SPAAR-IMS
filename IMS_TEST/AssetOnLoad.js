@@ -61,33 +61,33 @@ function captureInitialValues(formContext) {
     }
 }
 
-// Function to update previous values if necessary
+// Function to update previous values only if necessary
 function updatePreviousValues(formContext) {
     // Category
     var previousCategory = formContext.getAttribute("new_previouscategory").getValue();
-    if (!previousCategory || previousCategory !== initialCategoryName) {
+    if (!previousCategory) {
         formContext.getAttribute("new_previouscategory").setValue(initialCategoryName);
-        console.log(`Previous Category updated to: ${initialCategoryName}`);
+        console.log(`Previous Category set to: ${initialCategoryName}`);
     }
 
     // Model
     var previousModel = formContext.getAttribute("new_previousmodel").getValue();
-    if (!previousModel || previousModel !== initialModelName) {
+    if (!previousModel) {
         formContext.getAttribute("new_previousmodel").setValue(initialModelName);
-        console.log(`Previous Model updated to: ${initialModelName}`);
+        console.log(`Previous Model set to: ${initialModelName}`);
     }
 
     // Assigned To
     var previousUser = formContext.getAttribute("new_previoususer").getValue();
-    if (!previousUser || previousUser !== initialAssignedTo) {
+    if (!previousUser) {
         formContext.getAttribute("new_previoususer").setValue(initialAssignedTo);
-        console.log(`Previous Assigned To updated to: ${initialAssignedTo}`);
+        console.log(`Previous Assigned To set to: ${initialAssignedTo}`);
     }
 
     // Status
     var previousStatus = formContext.getAttribute("new_previousstatus").getValue();
-    if (!previousStatus || previousStatus !== initialStatusName) {
+    if (!previousStatus) {
         formContext.getAttribute("new_previousstatus").setValue(initialStatusName);
-        console.log(`Previous Status updated to: ${initialStatusName}`);
+        console.log(`Previous Status set to: ${initialStatusName}`);
     }
 }
