@@ -23,7 +23,7 @@ function onLoadAssetForm(executionContext) {
             originalCategoryId = initialCategory;
             originalAssetCode = initialAssetCode;
             originalCategoryName = initialCategoryName;
-            console.log("Initial category: ", initialCategoryName, " (ID: ", originalCategoryId, ")");
+            console.log(`Initial category: ${initialCategoryName} (ID: ${originalCategoryId})`);
             console.log("Initial asset code:", originalAssetCode);
         }
     }
