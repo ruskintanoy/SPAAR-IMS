@@ -61,7 +61,7 @@ function captureInitialValues(formContext) {
     }
 }
 
-// Function to update previous values only if necessary
+// Function to update previous values only if necessary (for existing records)
 function updatePreviousValues(formContext) {
     // Category
     var previousCategory = formContext.getAttribute("new_previouscategory").getValue();

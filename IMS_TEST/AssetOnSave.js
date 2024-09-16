@@ -17,16 +17,13 @@ function onSaveAssetForm(executionContext) {
     var modelId = modelLookup[0].id.replace("{", "").replace("}", ""); // Get model GUID
     var newStatusName = newStatus ? newStatus[0].name : null; // Current device status
 
-    // Define alert message for "Assigned To" field validation
-    var assignedToAlertMessage = {};
-
-
     // Validation: Prevent save if status is "Assigned" and "Assigned To" is null
     if (newStatusName === "Assigned" && !assignedToValue) {
         var alertStrings = { 
             confirmButtonLabel: "OK", 
             title: "⚠️ User Assignment Required", 
-            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving." };
+            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving." 
+        };
 
         var alertOptions = {
             height: 240,
@@ -42,19 +39,23 @@ function onSaveAssetForm(executionContext) {
         return;
     }
 
-    var initialStatus = formContext.getAttribute("new_previousstatus").getValue(); // Treat this as a text field!
+    var initialStatus = formContext.getAttribute("new_previousstatus").getValue(); // Previous status as string
 
-    // Only proceed if there's a model and status
-    if (!newStatus || !modelId) {
-        console.error("Model or status missing.");
-        return;
+    // Handle the first-time creation and populate previous fields on first save
+    if (!assetId) {
+        console.log("New asset being created, populating previous fields on first save.");
+
+        formContext.getAttribute("new_previouscategory").setValue(formContext.getAttribute("cr4d3_category").getValue()[0].name);
+        formContext.getAttribute("new_previousmodel").setValue(formContext.getAttribute("cr4d3_model").getValue()[0].name);
+        formContext.getAttribute("new_previoususer").setValue(assignedToValue ? assignedToValue[0].name : null);
+        formContext.getAttribute("new_previousstatus").setValue(newStatusName);
+
+        console.log("Previous fields populated on new asset creation.");
     }
 
-    var initialStatusName = initialStatus; // This is the previous status stored in the simple text field
-
     // Perform inventory updates based on status changes
-    if (initialStatusName !== newStatusName) {
-        updateInventoryBasedOnStatusChange(modelId, initialStatusName, newStatusName);
+    if (initialStatus !== newStatusName) {
+        updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatusName);
         // Update the previous status to match the new status after the save
         formContext.getAttribute("new_previousstatus").setValue(newStatusName);
     } else {
@@ -67,24 +68,10 @@ function onSaveAssetForm(executionContext) {
         width: 180
     };
 
-    // Define message for new or updated asset
-    var successMessage = {};
+    var successMessage = assetId 
+        ? { title: "✅ Asset Updated", text: "Asset updated successfully.\nThe asset record has been modified and saved." }
+        : { title: "✅ Asset Created", text: "New asset created.\nThe asset record has been added to the system." };
 
-    if (assetId) {
-        successMessage = {
-            title: "✅ Asset Updated",
-            text: "Asset updated successfully.\nThe asset record has been modified and saved."
-        };
-        console.log("Asset updated.");
-    } else {
-        successMessage = {
-            title: "✅ Asset Created",
-            text: "New asset created.\nThe asset record has been added to the system."
-        };
-        console.log("New asset created.");
-    }
-
-    // Show the alert dialog with improved message
     var alertStrings = { confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text };
 
     Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(
@@ -107,7 +94,6 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
             var totalInventory = result.cr4d3_inventoryquantity || 0;
             var unitsAvailable = result.new_available || 0;
 
-            // Define how inventory and availability should be updated based on status changes
             if (initialStatus === "Assigned" && newStatus === "Stored") {
                 unitsAvailable += 1;
             } else if (initialStatus === "Assigned" && newStatus === "Retired") {
@@ -124,14 +110,11 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
                 unitsAvailable += 1;
             } else if (!initialStatus && newStatus === "Stored") {
                 totalInventory += 1;
-                unitsAvailable += 1; // For new records created with "Stored"
+                unitsAvailable += 1;
             } else if (!initialStatus && newStatus === "Assigned") {
-                totalInventory += 1; // For new records created with "Assigned"
+                totalInventory += 1;
             }
 
-            console.log(`Updated Total Inventory: ${totalInventory}, Updated Units Available: ${unitsAvailable}`);
-
-            // Update the model record with the new inventory values
             var updateData = {
                 cr4d3_inventoryquantity: totalInventory,
                 new_available: unitsAvailable
