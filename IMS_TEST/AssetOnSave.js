@@ -6,6 +6,8 @@ function onSaveAssetForm(executionContext) {
     var formContext = executionContext.getFormContext();
     var assetId = formContext.data.entity.getId(); // Get the record ID
     var modelLookup = formContext.getAttribute("cr4d3_model").getValue(); // Get the related model
+    var assignedToValue = formContext.getAttribute("new_assignedto").getValue(); // Get "Assigned To" field
+    var newStatus = formContext.getAttribute("cr4d3_status").getValue(); // Get the current status
 
     if (!modelLookup || modelLookup.length === 0) {
         console.error("No model selected. Cannot update inventory.");
@@ -13,8 +15,33 @@ function onSaveAssetForm(executionContext) {
     }
 
     var modelId = modelLookup[0].id.replace("{", "").replace("}", ""); // Get model GUID
+    var newStatusName = newStatus ? newStatus[0].name : null; // Current device status
 
-    var newStatus = formContext.getAttribute("cr4d3_status").getValue();
+    // Define alert message for "Assigned To" field validation
+    var assignedToAlertMessage = {};
+
+
+    // Validation: Prevent save if status is "Assigned" and "Assigned To" is null
+    if (newStatusName === "Assigned" && !assignedToValue) {
+        var alertStrings = { 
+            confirmButtonLabel: "OK", 
+            title: "⚠️ User Assignment Required", 
+            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving." };
+
+        var alertOptions = {
+            height: 240,
+            width: 180
+        };
+
+        Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(function success() {
+            console.log("Alert shown: 'Assigned To' is required.");
+        });
+
+        // Prevent save
+        executionContext.getEventArgs().preventDefault();
+        return;
+    }
+
     var initialStatus = formContext.getAttribute("new_previousstatus").getValue(); // Treat this as a text field!
 
     // Only proceed if there's a model and status
@@ -23,7 +50,6 @@ function onSaveAssetForm(executionContext) {
         return;
     }
 
-    var newStatusName = newStatus[0].name; // This is the current device status (from lookup)
     var initialStatusName = initialStatus; // This is the previous status stored in the simple text field
 
     // Perform inventory updates based on status changes
