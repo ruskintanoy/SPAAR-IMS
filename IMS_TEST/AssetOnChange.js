@@ -5,13 +5,12 @@ let originalCategoryId = null;
 let originalAssetCode = null;
 let originalCategoryName = null; // For logging category name
 
-function onFieldChange(executionContext) {
+function onCategoryChange(executionContext) {
     console.log("Category change detected.");
 
     var formContext = executionContext.getFormContext();
     var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
-    var statusAttribute = formContext.getAttribute("cr4d3_status"); // Device status field
-    var assignedDateAttribute = formContext.getAttribute("cr4d3_assigneddate"); // Assigned Date field
+    var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode"); // Asset Code field
 
     // Check if category field exists and has a value
     if (!categoryNameAttribute || !categoryNameAttribute.getValue()) {
@@ -26,29 +25,36 @@ function onFieldChange(executionContext) {
     // Log category name for tracking
     console.log(`Category: ${categoryName}`);
 
-    // Change the field label based on the category selected
-    updateDeviceIdentifierFieldLabel(formContext, categoryName);
+    // If the category has changed, regenerate the asset code
+    if (!originalCategoryId || originalCategoryId !== categoryId) {
+        console.log(`Category changed from ${originalCategoryName} to ${categoryName}. Generating new asset code.`);
+        originalCategoryId = categoryId; // Update the original category
+        originalCategoryName = categoryName;
 
-    // If the category is unchanged, restore original asset code
-    if (originalCategoryId && categoryId === originalCategoryId) {
-        console.log(`Category reverted to original: ${originalCategoryName}, restoring asset code.`);
-        formContext.getAttribute("cr4d3_assetcode").setValue(originalAssetCode);
-        return;
+        // Fetch the category prefix for the new selected category and regenerate asset code
+        Xrm.WebApi.retrieveRecord("cr4d3_category", categoryId, "?$select=cr4d3_categoryprefix").then(
+            function success(result) {
+                var categoryPrefix = result.cr4d3_categoryprefix;
+                console.log(`Prefix for ${categoryName}: ${categoryPrefix}`);
+
+                // Generate the asset code based on the category prefix
+                generateAssetCode(formContext, categoryPrefix);
+            },
+            function error(error) {
+                console.error(`Error fetching prefix for ${categoryName}:`, error.message);
+            }
+        );
+    } else {
+        console.log("Category has not changed. No need to regenerate asset code.");
     }
+}
 
-    // Fetch the category prefix for the selected category
-    Xrm.WebApi.retrieveRecord("cr4d3_category", categoryId, "?$select=cr4d3_categoryprefix").then(
-        function success(result) {
-            var categoryPrefix = result.cr4d3_categoryprefix;
-            console.log(`Prefix for ${categoryName}: ${categoryPrefix}`);
+function onStatusChange(executionContext) {
+    console.log("Status change detected.");
 
-            // Generate the asset code based on the category prefix
-            generateAssetCode(formContext, categoryPrefix);
-        },
-        function error(error) {
-            console.error(`Error fetching prefix for ${categoryName}:`, error.message);
-        }
-    );
+    var formContext = executionContext.getFormContext();
+    var statusAttribute = formContext.getAttribute("cr4d3_status"); // Device status field
+    var assignedDateAttribute = formContext.getAttribute("cr4d3_assigneddate"); // Assigned Date field
 
     // Check if the device status is "Assigned" and set the assigned date
     if (statusAttribute && statusAttribute.getValue()) {
