@@ -20,13 +20,13 @@ function onSaveAssetForm(executionContext) {
     // Define alert message for "Assigned To" field validation
     var assignedToAlertMessage = {};
 
-
     // Validation: Prevent save if status is "Assigned" and "Assigned To" is null
     if (newStatusName === "Assigned" && !assignedToValue) {
-        var alertStrings = { 
-            confirmButtonLabel: "OK", 
-            title: "⚠️ User Assignment Required", 
-            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving." };
+        var alertStrings = {
+            confirmButtonLabel: "OK",
+            title: "⚠️ User Assignment Required",
+            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving."
+        };
 
         var alertOptions = {
             height: 240,
@@ -61,6 +61,9 @@ function onSaveAssetForm(executionContext) {
         console.log("Status hasn't changed. No inventory update needed.");
     }
 
+    // Log changes to the timeline
+    logChangesToTimeline(formContext, assetId);
+
     // Continue with form saving process
     var alertOptions = {
         height: 240,
@@ -93,6 +96,44 @@ function onSaveAssetForm(executionContext) {
         },
         function error() {
             console.error("Error closing dialog.");
+        }
+    );
+}
+
+// Function to log changes in the timeline
+function logChangesToTimeline(formContext, assetId) {
+    var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
+    var model = formContext.getAttribute("cr4d3_model").getValue() ? formContext.getAttribute("cr4d3_model").getValue()[0].name : "N/A";
+    var category = formContext.getAttribute("cr4d3_category").getValue() ? formContext.getAttribute("cr4d3_category").getValue()[0].name : "N/A";
+    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
+    var status = formContext.getAttribute("cr4d3_status").getValue() ? formContext.getAttribute("cr4d3_status").getValue()[0].name : "N/A";
+    var assignedTo = formContext.getAttribute("new_assignedto").getValue() ? formContext.getAttribute("new_assignedto").getValue()[0].name : "N/A";
+
+    var changes = `
+        Asset Code: ${assetCode || "N/A"}\n
+        Model: ${model}\n
+        Category: ${category}\n
+        Device Identifier: ${deviceIdentifier || "N/A"}\n
+        Status: ${status}\n
+        Assigned To: ${assignedTo}
+    `;
+
+    var noteData = {
+        "notetext": changes,
+        "subject": assetId ? "Asset Updated" : "New Asset Created",
+    };
+
+    // Only bind the note to the asset record if the asset ID exists
+    if (assetId) {
+        noteData["objectid_cr4d3_asset@odata.bind"] = `/cr4d3_assets(${assetId.replace('{', '').replace('}', '')})`;
+    }
+
+    Xrm.WebApi.createRecord("annotation", noteData).then(
+        function success(result) {
+            console.log("Changes logged in the timeline as a note.");
+        },
+        function error(error) {
+            console.error("Error logging changes to timeline:", error.message);
         }
     );
 }
