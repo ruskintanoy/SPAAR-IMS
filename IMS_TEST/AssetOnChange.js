@@ -10,6 +10,8 @@ function onFieldChange(executionContext) {
 
     var formContext = executionContext.getFormContext();
     var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
+    var statusAttribute = formContext.getAttribute("cr4d3_status"); // Device status field
+    var assignedDateAttribute = formContext.getAttribute("cr4d3_assigneddate"); // Assigned Date field
 
     // Check if category field exists and has a value
     if (!categoryNameAttribute || !categoryNameAttribute.getValue()) {
@@ -47,6 +49,23 @@ function onFieldChange(executionContext) {
             console.error(`Error fetching prefix for ${categoryName}:`, error.message);
         }
     );
+
+    // Check if the device status is "Assigned" and set the assigned date
+    if (statusAttribute && statusAttribute.getValue()) {
+        var statusValue = statusAttribute.getValue()[0].name;
+
+        if (statusValue === "Assigned") {
+            // Set the current date to "Assigned Date" field
+            var currentDate = new Date();
+            assignedDateAttribute.setValue(currentDate);
+
+            console.log("Device status set to 'Assigned', updating Assigned Date to current date.");
+        } else {
+            // Clear the assigned date if status is not "Assigned"
+            assignedDateAttribute.setValue(null);
+            console.log("Device status is not 'Assigned', clearing Assigned Date.");
+        }
+    }
 }
 
 // Function to update the device identifier field label based on category
