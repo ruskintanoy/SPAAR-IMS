@@ -15,15 +15,12 @@ function onLoadAssetForm(executionContext) {
     // Check if the record is new or existing
     var assetId = formContext.data.entity.getId();
     if (!assetId) {
-        console.log("New asset record, skipping previous value population.");
+        console.log("New asset record, no need to populate previous values.");
         return; // Do nothing for new records
     }
 
     // Capture initial Asset Code, Category, Model, AssignedTo, and Status
     captureInitialValues(formContext);
-
-    // Check and populate previous values for Category, Model, AssignedTo, and Status
-    updatePreviousValues(formContext);
 }
 
 // Function to capture initial values
@@ -58,36 +55,5 @@ function captureInitialValues(formContext) {
     if (statusValue && statusValue.length > 0) {
         initialStatusName = statusValue[0].name;
         console.log(`Initial Status: ${initialStatusName}`);
-    }
-}
-
-// Function to update previous values only if necessary (for existing records)
-function updatePreviousValues(formContext) {
-    // Category
-    var previousCategory = formContext.getAttribute("new_previouscategory").getValue();
-    if (!previousCategory) {
-        formContext.getAttribute("new_previouscategory").setValue(initialCategoryName);
-        console.log(`Previous Category set to: ${initialCategoryName}`);
-    }
-
-    // Model
-    var previousModel = formContext.getAttribute("new_previousmodel").getValue();
-    if (!previousModel) {
-        formContext.getAttribute("new_previousmodel").setValue(initialModelName);
-        console.log(`Previous Model set to: ${initialModelName}`);
-    }
-
-    // Assigned To
-    var previousUser = formContext.getAttribute("new_previoususer").getValue();
-    if (!previousUser) {
-        formContext.getAttribute("new_previoususer").setValue(initialAssignedTo);
-        console.log(`Previous Assigned To set to: ${initialAssignedTo}`);
-    }
-
-    // Status
-    var previousStatus = formContext.getAttribute("new_previousstatus").getValue();
-    if (!previousStatus) {
-        formContext.getAttribute("new_previousstatus").setValue(initialStatusName);
-        console.log(`Previous Status set to: ${initialStatusName}`);
     }
 }

@@ -41,45 +41,130 @@ function onSaveAssetForm(executionContext) {
 
     var initialStatus = formContext.getAttribute("new_previousstatus").getValue(); // Previous status as string
 
-    // Handle the first-time creation and populate previous fields on first save
-    if (!assetId) {
-        console.log("New asset being created, populating previous fields on first save.");
-
-        formContext.getAttribute("new_previouscategory").setValue(formContext.getAttribute("cr4d3_category").getValue()[0].name);
-        formContext.getAttribute("new_previousmodel").setValue(formContext.getAttribute("cr4d3_model").getValue()[0].name);
-        formContext.getAttribute("new_previoususer").setValue(assignedToValue ? assignedToValue[0].name : null);
-        formContext.getAttribute("new_previousstatus").setValue(newStatusName);
-
-        console.log("Previous fields populated on new asset creation.");
-    }
+    var isNewAsset = !assetId; // Check if it's a new asset
 
     // Perform inventory updates based on status changes
     if (initialStatus !== newStatusName) {
         updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatusName);
-        // Update the previous status to match the new status after the save
-        formContext.getAttribute("new_previousstatus").setValue(newStatusName);
+        formContext.getAttribute("new_previousstatus").setValue(newStatusName); // Update the previous status after save
     } else {
         console.log("Status hasn't changed. No inventory update needed.");
     }
 
-    // Continue with form saving process
+    // Populate the previous fields after a successful save
+    populatePreviousFieldsOnSave(formContext);
+
     var alertOptions = {
         height: 240,
         width: 180
     };
 
-    var successMessage = assetId 
-        ? { title: "✅ Asset Updated", text: "Asset updated successfully.\nThe asset record has been modified and saved." }
-        : { title: "✅ Asset Created", text: "New asset created.\nThe asset record has been added to the system." };
+    var successMessage = isNewAsset 
+        ? { title: "✅ Asset Created", text: "New asset created.\nThe asset record has been added to the system." }
+        : { title: "✅ Asset Updated", text: "Asset updated successfully.\nThe asset record has been modified and saved." };
 
     var alertStrings = { confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text };
 
     Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(
         function success() {
             console.log("Dialog closed.");
+
+            // Log changes to the timeline only after the asset has been saved
+            if (isNewAsset) {
+                // Retrieve the assetId after save for new assets
+                var newlyCreatedAssetId = formContext.data.entity.getId();
+                logAssetChangesToTimeline(formContext, isNewAsset, newlyCreatedAssetId); // Pass the newly created asset ID
+            } else {
+                // Log changes for existing assets
+                logAssetChangesToTimeline(formContext, isNewAsset, assetId);
+            }
         },
         function error() {
             console.error("Error closing dialog.");
+        }
+    );
+}
+
+// Function to populate previous fields after save
+function populatePreviousFieldsOnSave(formContext) {
+    console.log("Populating previous fields after save...");
+
+    var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
+    var modelValue = formContext.getAttribute("cr4d3_model").getValue();
+    var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
+    var newStatus = formContext.getAttribute("cr4d3_status").getValue();
+    
+    // Category
+    if (categoryValue && categoryValue.length > 0) {
+        formContext.getAttribute("new_previouscategory").setValue(categoryValue[0].name);
+        console.log(`Previous Category set to: ${categoryValue[0].name}`);
+    }
+
+    // Model
+    if (modelValue && modelValue.length > 0) {
+        formContext.getAttribute("new_previousmodel").setValue(modelValue[0].name);
+        console.log(`Previous Model set to: ${modelValue[0].name}`);
+    }
+
+    // Assigned To
+    if (assignedToValue && assignedToValue.length > 0) {
+        formContext.getAttribute("new_previoususer").setValue(assignedToValue[0].name);
+        console.log(`Previous Assigned To set to: ${assignedToValue[0].name}`);
+    }
+
+    // Status
+    var newStatusName = newStatus ? newStatus[0].name : null;
+    if (newStatusName) {
+        formContext.getAttribute("new_previousstatus").setValue(newStatusName);
+        console.log(`Previous Status set to: ${newStatusName}`);
+    }
+}
+
+// Updated logAssetChangesToTimeline to accept assetId as a parameter
+function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
+    console.log("Logging asset changes to timeline...");
+
+    var notesContent = "";
+    var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
+    var modelValue = formContext.getAttribute("cr4d3_model").getValue();
+    var modelName = modelValue ? modelValue[0].name : null;
+    var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
+    var categoryName = categoryValue ? categoryValue[0].name : null;
+    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue(); // Device Identifier (Serial Number/IMEI)
+    var statusValue = formContext.getAttribute("cr4d3_status").getValue();
+    var statusName = statusValue ? statusValue[0].name : null;
+    var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
+    var assignedToName = assignedToValue ? assignedToValue[0].name : null;
+
+    if (isNewAsset) {
+        notesContent += `Asset "${assetCode}" Created\n\n`;
+    } else {
+        notesContent += `Asset "${assetCode}" Updated\n\n`;
+    }
+
+    if (assetCode) notesContent += `Asset Code: ${assetCode}\n`;
+    if (modelName) notesContent += `Model: ${modelName}\n`;
+    if (categoryName) notesContent += `Category: ${categoryName}\n`;
+    if (deviceIdentifier) notesContent += `Device Identifier: ${deviceIdentifier}\n`;
+    if (statusName) notesContent += `Device Status: ${statusName}\n`;
+    if (assignedToName) notesContent += `Assigned To: ${assignedToName}\n`;
+
+    // Ensure the assetId is formatted correctly
+    assetId = assetId.replace("{", "").replace("}", "");
+
+    // Create the note entity
+    var note = {
+        "notetext": notesContent,
+        "objectid_cr4d3_asset@odata.bind": `/cr4d3_assets(${assetId})`  // Bind to the asset ID
+    };
+
+    // Save the note to the timeline
+    Xrm.WebApi.createRecord("annotation", note).then(
+        function success() {
+            console.log("Asset changes successfully logged in timeline.");
+        },
+        function error(error) {
+            console.error("Error logging asset changes to timeline:", error.message);
         }
     );
 }
