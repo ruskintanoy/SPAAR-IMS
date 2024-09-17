@@ -120,7 +120,7 @@ function populatePreviousFieldsOnSave(formContext) {
     }
 }
 
-// Updated logAssetChangesToTimeline to accept assetId as a parameter
+// Updated logAssetChangesToTimeline function to handle new asset creation
 function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     console.log("Logging asset changes to timeline...");
 
@@ -136,18 +136,43 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
     var assignedToName = assignedToValue ? assignedToValue[0].name : null;
 
+    // Check if this is a new asset creation
     if (isNewAsset) {
-        notesContent += `Asset "${assetCode}" Created\n\n`;
-    } else {
-        notesContent += `Asset "${assetCode}" Updated\n\n`;
-    }
+        console.log("New asset creation detected. Logging all fields.");
 
-    if (assetCode) notesContent += `Asset Code: ${assetCode}\n`;
-    if (modelName) notesContent += `Model: ${modelName}\n`;
-    if (categoryName) notesContent += `Category: ${categoryName}\n`;
-    if (deviceIdentifier) notesContent += `Device Identifier: ${deviceIdentifier}\n`;
-    if (statusName) notesContent += `Device Status: ${statusName}\n`;
-    if (assignedToName) notesContent += `Assigned To: ${assignedToName}\n`;
+        notesContent += `Asset "${assetCode}" Created\n\n`;
+
+        if (assetCode) notesContent += `Asset Code: ${assetCode}\n`;
+        if (modelName) notesContent += `Model: ${modelName}\n`;
+        if (categoryName) notesContent += `Category: ${categoryName}\n`;
+        if (deviceIdentifier) notesContent += `Device Identifier: ${deviceIdentifier}\n`;
+        if (statusName) notesContent += `Device Status: ${statusName}\n`;
+        if (assignedToName) notesContent += `Assigned To: ${assignedToName}\n`;
+    } else {
+        console.log("Asset update detected. Logging only changed fields.");
+
+        notesContent += `Asset "${assetCode}" Updated\n\n`;
+
+        // Log only fields that have changed
+        if (assetCode && assetCode !== initialAssetCode) {
+            notesContent += `Asset Code: ${assetCode}\n`;
+        }
+        if (modelName && modelName !== initialModelName) {
+            notesContent += `Model: ${modelName}\n`;
+        }
+        if (categoryName && categoryName !== initialCategoryName) {
+            notesContent += `Category: ${categoryName}\n`;
+        }
+        if (deviceIdentifier && deviceIdentifier !== initialDeviceIdentifier) {
+            notesContent += `Device Identifier: ${deviceIdentifier}\n`;
+        }
+        if (statusName && statusName !== initialStatusName) {
+            notesContent += `Device Status: ${statusName}\n`;
+        }
+        if (assignedToName && assignedToName !== initialAssignedTo) {
+            notesContent += `Assigned To: ${assignedToName}\n`;
+        }
+    }
 
     // Ensure the assetId is formatted correctly
     assetId = assetId.replace("{", "").replace("}", "");

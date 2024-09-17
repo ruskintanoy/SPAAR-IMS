@@ -1,11 +1,10 @@
-// AssetOnLoad.js
-
 let initialAssetCode = null;
 let initialCategory = null;
 let initialCategoryName = null;
 let initialModelName = null;
 let initialAssignedTo = null;
 let initialStatusName = null; // For logs
+let initialDeviceIdentifier = null; // Capture the initial device identifier (serial number/IMEI)
 
 function onLoadAssetForm(executionContext) {
     console.log("Asset form loaded.");
@@ -19,7 +18,7 @@ function onLoadAssetForm(executionContext) {
         return; // Do nothing for new records
     }
 
-    // Capture initial Asset Code, Category, Model, AssignedTo, and Status
+    // Capture initial Asset Code, Category, Model, AssignedTo, Status, and Device Identifier
     captureInitialValues(formContext);
 }
 
@@ -56,4 +55,8 @@ function captureInitialValues(formContext) {
         initialStatusName = statusValue[0].name;
         console.log(`Initial Status: ${initialStatusName}`);
     }
+
+    // Device Identifier
+    initialDeviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
+    console.log(`Initial Device Identifier: ${initialDeviceIdentifier}`);
 }
