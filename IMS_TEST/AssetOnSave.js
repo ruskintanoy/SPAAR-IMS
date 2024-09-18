@@ -152,10 +152,11 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
     var assignedToName = assignedToValue ? assignedToValue[0].name : null;
 
+    var hasChanges = false;
+
     // Check if this is a new asset creation
     if (isNewAsset) {
         console.log("New asset creation detected. Logging all fields.");
-
         notesContent += `Asset "${assetCode}" Created\n\n`;
 
         if (assetCode) notesContent += `Asset Code: ${assetCode}\n`;
@@ -164,34 +165,46 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
         if (deviceIdentifier) notesContent += `Device Identifier: ${deviceIdentifier}\n`;
         if (statusName) notesContent += `Device Status: ${statusName}\n`;
         if (assignedToName) notesContent += `Assigned To: ${assignedToName}\n`;
+        hasChanges = true;
     } else {
         console.log("Asset update detected. Logging only changed fields.");
-
         notesContent += `Asset "${assetCode}" Updated\n\n`;
 
         // Log only fields that have changed
         if (assetCode && assetCode !== initialAssetCode) {
             notesContent += `Asset Code: ${assetCode}\n`;
+            hasChanges = true;
         }
         if (modelName && modelName !== initialModelName) {
             notesContent += `Model: ${modelName}\n`;
+            hasChanges = true;
         }
         if (categoryName && categoryName !== initialCategoryName) {
             notesContent += `Category: ${categoryName}\n`;
+            hasChanges = true;
         }
         if (deviceIdentifier && deviceIdentifier !== initialDeviceIdentifier) {
             notesContent += `Device Identifier: ${deviceIdentifier}\n`;
+            hasChanges = true;
         }
         if (statusName && statusName !== initialStatusName) {
             notesContent += `Device Status: ${statusName}\n`;
+            hasChanges = true;
         }
         if (assignedToName && assignedToName !== initialAssignedTo) {
             notesContent += `Assigned To: ${assignedToName}\n`;
+            hasChanges = true;
         }
     }
 
     // Ensure the assetId is formatted correctly
     assetId = assetId.replace("{", "").replace("}", "");
+
+    // If there are no changes, don't create a note
+    if (!hasChanges) {
+        console.log("No changes detected. Skipping timeline log.");
+        return Promise.resolve();
+    }
 
     // Create the note entity
     var note = {
