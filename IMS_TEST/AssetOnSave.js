@@ -1,5 +1,3 @@
-// AssetOnSave.js
-
 function onSaveAssetForm(executionContext) {
     console.log("Saving asset form...");
 
@@ -65,6 +63,7 @@ function onSaveAssetForm(executionContext) {
 
     var alertStrings = { confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text };
 
+    // Log the changes and refresh the timeline before closing the success message
     Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(
         function success() {
             console.log("Dialog closed.");
@@ -73,16 +72,33 @@ function onSaveAssetForm(executionContext) {
             if (isNewAsset) {
                 // Retrieve the assetId after save for new assets
                 var newlyCreatedAssetId = formContext.data.entity.getId();
-                logAssetChangesToTimeline(formContext, isNewAsset, newlyCreatedAssetId); // Pass the newly created asset ID
+                logAssetChangesToTimeline(formContext, isNewAsset, newlyCreatedAssetId).then(function() {
+                    // Refresh the timeline instead of the whole form
+                    refreshTimeline(formContext);
+                });
             } else {
                 // Log changes for existing assets
-                logAssetChangesToTimeline(formContext, isNewAsset, assetId);
+                logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(function() {
+                    // Refresh the timeline instead of the whole form
+                    refreshTimeline(formContext);
+                });
             }
         },
         function error() {
             console.error("Error closing dialog.");
         }
     );
+}
+
+// Function to refresh the timeline
+function refreshTimeline(formContext) {
+    var timelineControl = formContext.getControl("Timeline");
+    if (timelineControl) {
+        console.log("Timeline refreshed");
+        timelineControl.refresh();
+    } else {
+        console.error("Timeline control not found.");
+    }
 }
 
 // Function to populate previous fields after save
@@ -184,7 +200,7 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     };
 
     // Save the note to the timeline
-    Xrm.WebApi.createRecord("annotation", note).then(
+    return Xrm.WebApi.createRecord("annotation", note).then(
         function success() {
             console.log("Asset changes successfully logged in timeline.");
         },
