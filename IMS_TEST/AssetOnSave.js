@@ -1,3 +1,5 @@
+// AssetOnSave.js
+
 function onSaveAssetForm(executionContext) {
     console.log("Saving asset form...");
 
