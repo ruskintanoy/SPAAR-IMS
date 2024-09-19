@@ -17,12 +17,14 @@ function onSaveAssetForm(executionContext) {
     var modelId = modelLookup[0].id.replace("{", "").replace("}", "");
     var newStatusName = newStatus ? newStatus[0].name : null;
 
+    var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue(); 
+
     if (newStatusName === "Assigned" && !assignedToValue) {
         console.warn("[WARNING] 'Assigned To' field is empty but status is 'Assigned'. Blocking save.");
         var alertStrings = { 
             confirmButtonLabel: "OK", 
             title: "⚠️ User Assignment Required", 
-            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'." 
+            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving." 
         };
         var alertOptions = { height: 240, width: 180 };
         Xrm.Navigation.openAlertDialog(alertStrings, alertOptions);
@@ -42,8 +44,8 @@ function onSaveAssetForm(executionContext) {
     }
 
     var successMessage = isNewAsset 
-        ? { title: "✅ Asset Created", text: "New asset record added." }
-        : { title: "✅ Asset Updated", text: "Asset record updated." };
+        ? { title: `✅ Asset ${assetCode} Created`, text: `New asset created.\nThe asset record has been added to the system.` }
+        : { title: `✅ Asset ${assetCode} Updated`, text: `Asset updated successfully.\nThe asset record has been modified and saved.` };
 
     Xrm.Navigation.openAlertDialog({ confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text }).then(
         function success() {
@@ -54,7 +56,7 @@ function onSaveAssetForm(executionContext) {
             } else {
                 logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(() => refreshTimeline(formContext));
             }
-            
+
             // Update the initial values after save to reflect the new state
             captureInitialValues(formContext);
         },
