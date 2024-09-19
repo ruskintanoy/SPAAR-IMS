@@ -1,5 +1,3 @@
-// AssetOnSave.js
-
 function onSaveAssetForm(executionContext) {
     console.log("Saving asset form...");
 
@@ -51,9 +49,6 @@ function onSaveAssetForm(executionContext) {
         console.log("Status hasn't changed. No inventory update needed.");
     }
 
-    // Populate the previous fields after a successful save
-    populatePreviousFieldsOnSave(formContext);
-
     var alertOptions = {
         height: 240,
         width: 180
@@ -100,41 +95,6 @@ function refreshTimeline(formContext) {
         timelineControl.refresh();
     } else {
         console.error("Timeline control not found.");
-    }
-}
-
-// Function to populate previous fields after save
-function populatePreviousFieldsOnSave(formContext) {
-    console.log("Populating previous fields after save...");
-
-    var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
-    var modelValue = formContext.getAttribute("cr4d3_model").getValue();
-    var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
-    var newStatus = formContext.getAttribute("cr4d3_status").getValue();
-    
-    // Category
-    if (categoryValue && categoryValue.length > 0) {
-        formContext.getAttribute("new_previouscategory").setValue(categoryValue[0].name);
-        console.log(`Previous Category set to: ${categoryValue[0].name}`);
-    }
-
-    // Model
-    if (modelValue && modelValue.length > 0) {
-        formContext.getAttribute("new_previousmodel").setValue(modelValue[0].name);
-        console.log(`Previous Model set to: ${modelValue[0].name}`);
-    }
-
-    // Assigned To
-    if (assignedToValue && assignedToValue.length > 0) {
-        formContext.getAttribute("new_previoususer").setValue(assignedToValue[0].name);
-        console.log(`Previous Assigned To set to: ${assignedToValue[0].name}`);
-    }
-
-    // Status
-    var newStatusName = newStatus ? newStatus[0].name : null;
-    if (newStatusName) {
-        formContext.getAttribute("new_previousstatus").setValue(newStatusName);
-        console.log(`Previous Status set to: ${newStatusName}`);
     }
 }
 
