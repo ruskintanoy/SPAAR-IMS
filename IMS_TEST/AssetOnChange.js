@@ -52,39 +52,26 @@ function onStatusChange(executionContext) {
     var formContext = executionContext.getFormContext();
     var statusAttribute = formContext.getAttribute("cr4d3_status");
 
-    // Access header fields using "header_<fieldname>"
     var assignedToControl = formContext.getControl("header_new_assignedto");
     var assignedDateControl = formContext.getControl("header_cr4d3_assigneddate");
 
-    // Check if the status value is available
     if (statusAttribute && statusAttribute.getValue()) {
         var statusValue = statusAttribute.getValue()[0].name;
 
         if (statusValue === "Assigned") {
             var currentDate = new Date();
-            formContext.getAttribute("cr4d3_assigneddate").setValue(currentDate); 
+            formContext.getAttribute("cr4d3_assigneddate").setValue(currentDate);
             console.log("[INFO] Status set to 'Assigned'. Updated Assigned Date to current date.");
 
-            // Ensure the controls are available before using setVisible
-            if (assignedToControl) {
-                assignedToControl.setVisible(true);
-            }
-            if (assignedDateControl) {
-                assignedDateControl.setVisible(true);
-            }
+            if (assignedToControl) assignedToControl.setVisible(true);
+            if (assignedDateControl) assignedDateControl.setVisible(true);
         } else if (statusValue === "Retired" || statusValue === "Stored") {
-            // Clear the "Assigned To" and "Assigned Date" fields if status is not "Assigned"
             formContext.getAttribute("new_assignedto").setValue(null);
             formContext.getAttribute("cr4d3_assigneddate").setValue(null);
             console.log("[INFO] Status is 'Retired' or 'Stored'. Cleared Assigned To and Assigned Date fields.");
 
-            // Ensure the controls are available before using setVisible
-            if (assignedToControl) {
-                assignedToControl.setVisible(false);
-            }
-            if (assignedDateControl) {
-                assignedDateControl.setVisible(false);
-            }
+            if (assignedToControl) assignedToControl.setVisible(false);
+            if (assignedDateControl) assignedDateControl.setVisible(false);
         }
     } else {
         console.error("[ERROR] Status value not found.");

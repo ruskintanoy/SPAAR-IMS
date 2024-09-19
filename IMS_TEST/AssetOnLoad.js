@@ -21,6 +21,7 @@ function onLoadAssetForm(executionContext) {
 
     captureInitialValues(formContext);
     updatePreviousValues(formContext);
+    handleStatusVisibilityOnLoad(formContext);
 }
 
 function captureInitialValues(formContext) {
@@ -81,5 +82,28 @@ function updatePreviousValues(formContext) {
     if (!previousStatus && initialStatusName) {
         formContext.getAttribute("new_previousstatus").setValue(initialStatusName);
         console.log(`[INFO] Previous Status set to: ${initialStatusName}`);
+    }
+}
+
+// Function to handle visibility of fields based on status during form load
+function handleStatusVisibilityOnLoad(formContext) {
+    var statusAttribute = formContext.getAttribute("cr4d3_status");
+    var assignedToControl = formContext.getControl("header_new_assignedto");
+    var assignedDateControl = formContext.getControl("header_cr4d3_assigneddate");
+
+    if (statusAttribute && statusAttribute.getValue()) {
+        var statusValue = statusAttribute.getValue()[0].name;
+        
+        if (statusValue === "Assigned") {
+            if (assignedToControl) assignedToControl.setVisible(true);
+            if (assignedDateControl) assignedDateControl.setVisible(true);
+            console.log("[INFO] 'Assigned' status detected on load. Assigned To and Assigned Date fields are visible.");
+        } else {
+            if (assignedToControl) assignedToControl.setVisible(false);
+            if (assignedDateControl) assignedDateControl.setVisible(false);
+            console.log(`[INFO] '${statusValue}' status detected on load. Assigned To and Assigned Date fields are hidden.`);
+        }
+    } else {
+        console.error("[ERROR] Status value not found during form load.");
     }
 }
