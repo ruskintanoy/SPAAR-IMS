@@ -78,25 +78,27 @@ function refreshTimeline(formContext) {
 
 function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     console.log("[INFO] Logging asset changes to timeline.");
-    
+
     var notesContent = "";
     var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
     var modelValue = formContext.getAttribute("cr4d3_model").getValue();
     var modelName = modelValue ? modelValue[0].name : null;
     var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
     var categoryName = categoryValue ? categoryValue[0].name : null;
-    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue(); 
+    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
     var statusValue = formContext.getAttribute("cr4d3_status").getValue();
     var statusName = statusValue ? statusValue[0].name : null;
     var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
     var assignedToName = assignedToValue ? assignedToValue[0].name : null;
 
     var hasChanges = false;
+    var subject = "";  // Variable to hold the subject for the timeline entry
 
     // Check if this is a new asset creation
     if (isNewAsset) {
         console.log("New asset creation detected. Logging all fields.");
-        notesContent += `Asset "${assetCode}" Created\n\n`;
+        subject = `Asset ${assetCode} Created`;  // Subject for the new asset creation
+        notesContent += `Asset ${assetCode} created with the following information:\n\n`;
 
         if (assetCode) notesContent += `Asset Code: ${assetCode}\n`;
         if (modelName) notesContent += `Model: ${modelName}\n`;
@@ -107,7 +109,8 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
         hasChanges = true;
     } else {
         console.log("Asset update detected. Logging only changed fields.");
-        notesContent += `Asset "${assetCode}" Updated\n\n`;
+        subject = `Asset ${assetCode} Updated`;  // Subject for the asset update
+        notesContent += `Asset ${assetCode} updated with the following information:\n\n`;
 
         // Log only fields that have changed
         if (assetCode && assetCode !== initialAssetCode) {
@@ -147,6 +150,7 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
 
     // Create the note entity
     var note = {
+        "subject": subject,  // Set the subject for the timeline entry
         "notetext": notesContent,
         "objectid_cr4d3_asset@odata.bind": `/cr4d3_assets(${assetId})`  // Bind to the asset ID
     };
