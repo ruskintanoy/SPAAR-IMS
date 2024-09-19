@@ -1,4 +1,4 @@
-//AssetOnLoad.js
+// AssetOnLoad.js
 
 let initialAssetCode = null;
 let initialCategory = null;

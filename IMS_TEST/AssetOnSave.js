@@ -54,6 +54,9 @@ function onSaveAssetForm(executionContext) {
             } else {
                 logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(() => refreshTimeline(formContext));
             }
+            
+            // Update the initial values after save to reflect the new state
+            captureInitialValues(formContext);
         },
         function error() {
             console.error("[ERROR] Error occurred while closing the dialog.");
