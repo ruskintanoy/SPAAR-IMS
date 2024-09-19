@@ -1,114 +1,86 @@
+// AssetOnSave.js
+
 function onSaveAssetForm(executionContext) {
-    console.log("Saving asset form...");
+    console.log("[INFO] Saving asset form...");
 
     var formContext = executionContext.getFormContext();
-    var assetId = formContext.data.entity.getId(); // Get the record ID
-    var modelLookup = formContext.getAttribute("cr4d3_model").getValue(); // Get the related model
-    var assignedToValue = formContext.getAttribute("new_assignedto").getValue(); // Get "Assigned To" field
-    var newStatus = formContext.getAttribute("cr4d3_status").getValue(); // Get the current status
+    var assetId = formContext.data.entity.getId();
+    var modelLookup = formContext.getAttribute("cr4d3_model").getValue();
+    var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
+    var newStatus = formContext.getAttribute("cr4d3_status").getValue();
 
     if (!modelLookup || modelLookup.length === 0) {
-        console.error("No model selected. Cannot update inventory.");
+        console.error("[ERROR] No model selected. Cannot update inventory.");
         return;
     }
 
-    var modelId = modelLookup[0].id.replace("{", "").replace("}", ""); // Get model GUID
-    var newStatusName = newStatus ? newStatus[0].name : null; // Current device status
+    var modelId = modelLookup[0].id.replace("{", "").replace("}", "");
+    var newStatusName = newStatus ? newStatus[0].name : null;
 
-    // Validation: Prevent save if status is "Assigned" and "Assigned To" is null
     if (newStatusName === "Assigned" && !assignedToValue) {
+        console.warn("[WARNING] 'Assigned To' field is empty but status is 'Assigned'. Blocking save.");
         var alertStrings = { 
             confirmButtonLabel: "OK", 
             title: "⚠️ User Assignment Required", 
-            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'. Please assign this device to a user before saving." 
+            text: "The 'Assigned To' field cannot be left blank when the device status is 'Assigned'." 
         };
-
-        var alertOptions = {
-            height: 240,
-            width: 180
-        };
-
-        Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(function success() {
-            console.log("Alert shown: 'Assigned To' is required.");
-        });
-
-        // Prevent save
+        var alertOptions = { height: 240, width: 180 };
+        Xrm.Navigation.openAlertDialog(alertStrings, alertOptions);
         executionContext.getEventArgs().preventDefault();
         return;
     }
 
-    var initialStatus = formContext.getAttribute("new_previousstatus").getValue(); // Previous status as string
+    var initialStatus = formContext.getAttribute("new_previousstatus").getValue();
+    var isNewAsset = !assetId;
 
-    var isNewAsset = !assetId; // Check if it's a new asset
-
-    // Perform inventory updates based on status changes
     if (initialStatus !== newStatusName) {
+        console.log(`[INFO] Status change detected: ${initialStatus} → ${newStatusName}. Updating inventory.`);
         updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatusName);
-        formContext.getAttribute("new_previousstatus").setValue(newStatusName); // Update the previous status after save
+        formContext.getAttribute("new_previousstatus").setValue(newStatusName);
     } else {
-        console.log("Status hasn't changed. No inventory update needed.");
+        console.log("[INFO] No status change detected. Skipping inventory update.");
     }
 
-    var alertOptions = {
-        height: 240,
-        width: 180
-    };
-
     var successMessage = isNewAsset 
-        ? { title: "✅ Asset Created", text: "New asset created.\nThe asset record has been added to the system." }
-        : { title: "✅ Asset Updated", text: "Asset updated successfully.\nThe asset record has been modified and saved." };
+        ? { title: "✅ Asset Created", text: "New asset record added." }
+        : { title: "✅ Asset Updated", text: "Asset record updated." };
 
-    var alertStrings = { confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text };
-
-    // Log the changes and refresh the timeline before closing the success message
-    Xrm.Navigation.openAlertDialog(alertStrings, alertOptions).then(
+    Xrm.Navigation.openAlertDialog({ confirmButtonLabel: "OK", title: successMessage.title, text: successMessage.text }).then(
         function success() {
-            console.log("Dialog closed.");
-
-            // Log changes to the timeline only after the asset has been saved
+            console.log("[INFO] Dialog closed. Proceeding with timeline log.");
             if (isNewAsset) {
-                // Retrieve the assetId after save for new assets
                 var newlyCreatedAssetId = formContext.data.entity.getId();
-                logAssetChangesToTimeline(formContext, isNewAsset, newlyCreatedAssetId).then(function() {
-                    // Refresh the timeline instead of the whole form
-                    refreshTimeline(formContext);
-                });
+                logAssetChangesToTimeline(formContext, isNewAsset, newlyCreatedAssetId).then(() => refreshTimeline(formContext));
             } else {
-                // Log changes for existing assets
-                logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(function() {
-                    // Refresh the timeline instead of the whole form
-                    refreshTimeline(formContext);
-                });
+                logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(() => refreshTimeline(formContext));
             }
         },
         function error() {
-            console.error("Error closing dialog.");
+            console.error("[ERROR] Error occurred while closing the dialog.");
         }
     );
 }
 
-// Function to refresh the timeline
 function refreshTimeline(formContext) {
     var timelineControl = formContext.getControl("Timeline");
     if (timelineControl) {
-        console.log("Timeline refreshed");
+        console.log("[INFO] Refreshing timeline.");
         timelineControl.refresh();
     } else {
-        console.error("Timeline control not found.");
+        console.error("[ERROR] Timeline control not found.");
     }
 }
 
-// Updated logAssetChangesToTimeline function to handle new asset creation
 function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
-    console.log("Logging asset changes to timeline...");
-
+    console.log("[INFO] Logging asset changes to timeline.");
+    
     var notesContent = "";
     var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
     var modelValue = formContext.getAttribute("cr4d3_model").getValue();
     var modelName = modelValue ? modelValue[0].name : null;
     var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
     var categoryName = categoryValue ? categoryValue[0].name : null;
-    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue(); // Device Identifier (Serial Number/IMEI)
+    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue(); 
     var statusValue = formContext.getAttribute("cr4d3_status").getValue();
     var statusName = statusValue ? statusValue[0].name : null;
     var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
@@ -185,10 +157,9 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     );
 }
 
-// Function to update inventory based on status changes
 function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
-    console.log(`Initial Status: ${initialStatus}, New Status: ${newStatus}`);
-
+    console.log(`[INFO] Updating inventory based on status change: ${initialStatus} → ${newStatus}`);
+    
     // Fetch the model record to get current inventory and units available
     Xrm.WebApi.retrieveRecord("cr4d3_model", modelId, "?$select=cr4d3_inventoryquantity,new_available").then(
         function success(result) {
