@@ -92,12 +92,12 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     var assignedToName = assignedToValue ? assignedToValue[0].name : null;
 
     var hasChanges = false;
-    var subject = "";  // Variable to hold the subject for the timeline entry
+    var subject = "";  
 
     // Check if this is a new asset creation
     if (isNewAsset) {
         console.log("New asset creation detected. Logging all fields.");
-        subject = `Asset ${assetCode} Created`;  // Subject for the new asset creation
+        subject = `Asset ${assetCode} Created`;  
         notesContent += `Asset ${assetCode} created with the following information:\n\n`;
 
         if (assetCode) notesContent += `Asset Code: ${assetCode}\n`;
@@ -109,7 +109,7 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
         hasChanges = true;
     } else {
         console.log("Asset update detected. Logging only changed fields.");
-        subject = `Asset ${assetCode} Updated`;  // Subject for the asset update
+        subject = `Asset ${assetCode} Updated`;  
         notesContent += `Asset ${assetCode} updated with the following information:\n\n`;
 
         // Log only fields that have changed
@@ -150,7 +150,7 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
 
     // Create the note entity
     var note = {
-        "subject": subject,  // Set the subject for the timeline entry
+        "subject": subject,  
         "notetext": notesContent,
         "objectid_cr4d3_asset@odata.bind": `/cr4d3_assets(${assetId})`  // Bind to the asset ID
     };

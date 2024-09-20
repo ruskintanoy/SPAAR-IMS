@@ -1,14 +1,14 @@
 // To store initial state of category and asset code
 let originalCategoryId = null;
 let originalAssetCode = null;
-let originalCategoryName = null; // For logging category name
+let originalCategoryName = null; 
 
 function onCategoryChange(executionContext) {
     console.log("Category change event triggered.");
 
     var formContext = executionContext.getFormContext();
     var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
-    var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode"); // Asset Code field
+    var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode"); 
 
     if (!categoryNameAttribute || !categoryNameAttribute.getValue()) {
         console.error("[ERROR] Category is empty, cannot generate asset code.");
@@ -16,8 +16,8 @@ function onCategoryChange(executionContext) {
     }
 
     var categoryValue = categoryNameAttribute.getValue();
-    var categoryId = categoryValue[0].id.replace("{", "").replace("}", ""); // Get Category GUID
-    var categoryName = categoryValue[0].name; // Get Category Name
+    var categoryId = categoryValue[0].id.replace("{", "").replace("}", ""); 
+    var categoryName = categoryValue[0].name; 
 
     updateDeviceIdentifierFieldLabel(formContext, categoryName);
     console.log(`[INFO] Category Selected: ${categoryName}, ID: ${categoryId}`);
