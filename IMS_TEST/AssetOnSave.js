@@ -81,11 +81,11 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
 
     var notesContent = "";
     var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
+    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
     var modelValue = formContext.getAttribute("cr4d3_model").getValue();
     var modelName = modelValue ? modelValue[0].name : null;
     var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
     var categoryName = categoryValue ? categoryValue[0].name : null;
-    var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
     var statusValue = formContext.getAttribute("cr4d3_status").getValue();
     var statusName = statusValue ? statusValue[0].name : null;
     var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
