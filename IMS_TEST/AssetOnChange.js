@@ -99,24 +99,46 @@ function updateDeviceIdentifierFieldLabel(formContext, categoryName) {
 function generateAssetCode(formContext, categoryPrefix) {
     console.log(`[INFO] Generating asset code for prefix: ${categoryPrefix}`);
 
-    var assetQuery = `?$filter=startswith(cr4d3_assetcode, '${categoryPrefix}')&$orderby=cr4d3_assetcode desc&$top=1`;
+    // Build a query to fetch all asset codes for the given category prefix
+    var assetQuery = `?$filter=startswith(cr4d3_assetcode, '${categoryPrefix}')&$orderby=cr4d3_assetcode asc`;
 
     Xrm.WebApi.retrieveMultipleRecords("cr4d3_asset", assetQuery).then(
         function success(result) {
-            var nextSequenceNumber = "001";
+            var existingCodes = [];
+            result.entities.forEach(function (entity) {
+                var code = entity.cr4d3_assetcode;
+                var numericPart = parseInt(code.replace(categoryPrefix, ""));
+                existingCodes.push(numericPart);
+            });
 
-            if (result.entities.length > 0) {
-                var latestAssetCode = result.entities[0].cr4d3_assetcode;
-                var numericPart = parseInt(latestAssetCode.replace(categoryPrefix, "")) + 1;
-                nextSequenceNumber = ("000" + numericPart).slice(-3);
+            // Sort the codes numerically to check for missing numbers
+            existingCodes.sort(function (a, b) {
+                return a - b;
+            });
+
+            var nextSequenceNumber = null;
+
+            // Find the first missing number in the sequence
+            for (var i = 0; i < existingCodes.length; i++) {
+                if (existingCodes[i] !== i + 1) { // Sequence should start from 1
+                    nextSequenceNumber = i + 1;
+                    break;
+                }
             }
 
-            var newAssetCode = categoryPrefix + nextSequenceNumber;
+            // If no missing number is found, assign the next in sequence
+            if (nextSequenceNumber === null) {
+                nextSequenceNumber = existingCodes.length + 1;
+            }
+
+            var formattedSequence = ("000" + nextSequenceNumber).slice(-3); // Pad to 3 digits
+            var newAssetCode = categoryPrefix + formattedSequence;
+
             console.log(`[INFO] New Asset Code Generated: ${newAssetCode}`);
             formContext.getAttribute("cr4d3_assetcode").setValue(newAssetCode);
         },
         function error(error) {
-            console.error("[ERROR] Failed to retrieve asset code:", error.message);
+            console.error("[ERROR] Failed to retrieve asset codes:", error.message);
         }
     );
 }
