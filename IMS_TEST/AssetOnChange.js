@@ -10,7 +10,6 @@ function onCategoryChange(executionContext) {
 
   var formContext = executionContext.getFormContext();
   var categoryNameAttribute = formContext.getAttribute("cr4d3_category");
-  var assetCodeAttribute = formContext.getAttribute("cr4d3_assetcode");
 
   if (!categoryNameAttribute || !categoryNameAttribute.getValue()) {
     console.error("[ERROR] Category is empty, cannot generate asset code.");

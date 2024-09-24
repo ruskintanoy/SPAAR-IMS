@@ -12,17 +12,8 @@ function onLoadAssetForm(executionContext) {
   console.log("[INFO] Asset form loaded.");
 
   var formContext = executionContext.getFormContext();
-  var assetId = formContext.data.entity.getId();
-
-  if (!assetId) {
-    console.log(
-      "[INFO] New asset record. Skipping previous values population."
-    );
-    return;
-  }
 
   captureInitialValues(formContext);
-  updatePreviousValues(formContext);
   handleStatusVisibilityOnLoad(formContext);
 }
 
@@ -55,44 +46,8 @@ function captureInitialValues(formContext) {
     console.log(`[INFO] Initial Status: ${initialStatusName}`);
   }
 
-  initialDeviceIdentifier = formContext
-    .getAttribute("cr4d3_serialnumber")
-    .getValue();
+  initialDeviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
   console.log(`[INFO] Initial Device Identifier: ${initialDeviceIdentifier}`);
-}
-
-function updatePreviousValues(formContext) {
-  console.log("[INFO] Updating previous values on form load.");
-
-  var previousCategory = formContext
-    .getAttribute("new_previouscategory")
-    .getValue();
-  if (!previousCategory && initialCategoryName) {
-    formContext
-      .getAttribute("new_previouscategory")
-      .setValue(initialCategoryName);
-    console.log(`[INFO] Previous Category set to: ${initialCategoryName}`);
-  }
-
-  var previousModel = formContext.getAttribute("new_previousmodel").getValue();
-  if (!previousModel && initialModelName) {
-    formContext.getAttribute("new_previousmodel").setValue(initialModelName);
-    console.log(`[INFO] Previous Model set to: ${initialModelName}`);
-  }
-
-  var previousUser = formContext.getAttribute("new_previoususer").getValue();
-  if (!previousUser && initialAssignedTo) {
-    formContext.getAttribute("new_previoususer").setValue(initialAssignedTo);
-    console.log(`[INFO] Previous Assigned To set to: ${initialAssignedTo}`);
-  }
-
-  var previousStatus = formContext
-    .getAttribute("new_previousstatus")
-    .getValue();
-  if (!previousStatus && initialStatusName) {
-    formContext.getAttribute("new_previousstatus").setValue(initialStatusName);
-    console.log(`[INFO] Previous Status set to: ${initialStatusName}`);
-  }
 }
 
 // Function to handle visibility of fields based on status during form load
