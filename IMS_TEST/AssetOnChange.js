@@ -141,7 +141,6 @@ function generateAssetCode(formContext, categoryPrefix) {
       // Find the first missing number in the sequence
       for (var i = 0; i < existingCodes.length; i++) {
         if (existingCodes[i] !== i + 1) {
-          // Sequence should start from 1
           nextSequenceNumber = i + 1;
           break;
         }
@@ -163,3 +162,53 @@ function generateAssetCode(formContext, categoryPrefix) {
     }
   );
 }
+
+function onDeviceIdentifierChange(executionContext) {
+  console.log("[INFO] Device Identifier change event triggered.");
+
+  var formContext = executionContext.getFormContext();
+  var deviceIdentifierAttribute = formContext.getAttribute("cr4d3_serialnumber");
+  var deviceIdentifierControl = formContext.getControl("cr4d3_serialnumber");
+  
+  if (!deviceIdentifierAttribute || !deviceIdentifierAttribute.getValue()) {
+      console.warn("[WARNING] Device Identifier is empty. No validation needed.");
+      // Clear notifications and return
+      deviceIdentifierControl.clearNotification();
+      return;
+  }
+
+  var deviceIdentifier = deviceIdentifierAttribute.getValue();
+  var assetId = formContext.data.entity.getId();
+
+  // Only check for uniqueness if this is a new asset (i.e., assetId is null or undefined)
+  if (!assetId) {
+      console.log("[INFO] New asset record. Validating uniqueness for Device Identifier:", deviceIdentifier);
+
+      var query = `?$filter=cr4d3_serialnumber eq '${deviceIdentifier}'`;
+
+      Xrm.WebApi.retrieveMultipleRecords("cr4d3_asset", query).then(
+          function success(result) {
+              if (result.entities.length > 0) {
+                  console.error("[ERROR] Device Identifier already exists. Displaying field error.");
+
+                  // Display error at the field level
+                  var notificationId = "duplicateDeviceIdentifier";
+                  var notificationMessage = "This Device Identifier already exists. Please provide a unique ID.";
+                  
+                  deviceIdentifierControl.setNotification(notificationMessage, notificationId);
+
+                  // Do not clear the device identifier value
+              } else {
+                  console.log("[INFO] Device Identifier is unique.");
+                  deviceIdentifierControl.clearNotification(); // Clear any previous error
+              }
+          },
+          function error(error) {
+              console.error("[ERROR] Failed to validate Device Identifier uniqueness:", error.message);
+          }
+      );
+  } else {
+      console.log("[INFO] Existing asset record. No validation needed.");
+  }
+}
+
