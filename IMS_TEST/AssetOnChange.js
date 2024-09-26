@@ -1,6 +1,5 @@
 // AssetOnChange.js
 
-// To store initial state of category and asset code
 let originalCategoryId = null;
 let originalAssetCode = null;
 let originalCategoryName = null;
@@ -119,7 +118,7 @@ function updateDeviceIdentifierFieldLabel(formContext, categoryName) {
 function generateAssetCode(formContext, categoryPrefix) {
   console.log(`[INFO] Generating asset code for prefix: ${categoryPrefix}`);
 
-  // Build a query to fetch all asset codes for the given category prefix
+  
   var assetQuery = `?$filter=startswith(cr4d3_assetcode, '${categoryPrefix}')&$orderby=cr4d3_assetcode asc`;
 
   Xrm.WebApi.retrieveMultipleRecords("cr4d3_asset", assetQuery).then(
@@ -138,7 +137,6 @@ function generateAssetCode(formContext, categoryPrefix) {
 
       var nextSequenceNumber = null;
 
-      // Find the first missing number in the sequence
       for (var i = 0; i < existingCodes.length; i++) {
         if (existingCodes[i] !== i + 1) {
           nextSequenceNumber = i + 1;
@@ -146,13 +144,11 @@ function generateAssetCode(formContext, categoryPrefix) {
         }
       }
 
-      // If no missing number is found, assign the next in sequence
       if (nextSequenceNumber === null) {
         nextSequenceNumber = existingCodes.length + 1;
       }
 
-      var formattedSequence = ("000" + nextSequenceNumber).slice(-3); // Pad to 3 digits
-      var newAssetCode = categoryPrefix + formattedSequence;
+      var formattedSequence = ("000" + nextSequenceNumber).slice(-3); 
 
       console.log(`[INFO] New Asset Code Generated: ${newAssetCode}`);
       formContext.getAttribute("cr4d3_assetcode").setValue(newAssetCode);
@@ -172,7 +168,6 @@ function onDeviceIdentifierChange(executionContext) {
   
   if (!deviceIdentifierAttribute || !deviceIdentifierAttribute.getValue()) {
       console.warn("[WARNING] Device Identifier is empty. No validation needed.");
-      // Clear notifications and return
       deviceIdentifierControl.clearNotification();
       return;
   }
@@ -180,7 +175,6 @@ function onDeviceIdentifierChange(executionContext) {
   var deviceIdentifier = deviceIdentifierAttribute.getValue();
   var assetId = formContext.data.entity.getId();
 
-  // Only check for uniqueness if this is a new asset (i.e., assetId is null or undefined)
   if (!assetId) {
       console.log("[INFO] New asset record. Validating uniqueness for Device Identifier:", deviceIdentifier);
 
@@ -191,16 +185,13 @@ function onDeviceIdentifierChange(executionContext) {
               if (result.entities.length > 0) {
                   console.error("[ERROR] Device Identifier already exists. Displaying field error.");
 
-                  // Display error at the field level
                   var notificationId = "duplicateDeviceIdentifier";
-                  var notificationMessage = "This Device Identifier already exists. Please provide a unique ID.";
-                  
+                  var notificationMessage = "This Device Identifier already exists. Please provide a unique ID."
                   deviceIdentifierControl.setNotification(notificationMessage, notificationId);
 
-                  // Do not clear the device identifier value
               } else {
                   console.log("[INFO] Device Identifier is unique.");
-                  deviceIdentifierControl.clearNotification(); // Clear any previous error
+                  deviceIdentifierControl.clearNotification(); 
               }
           },
           function error(error) {

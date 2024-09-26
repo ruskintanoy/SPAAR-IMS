@@ -50,7 +50,6 @@ function captureInitialValues(formContext) {
   console.log(`[INFO] Initial Device Identifier: ${initialDeviceIdentifier}`);
 }
 
-// Function to handle visibility of fields based on status during form load
 function handleStatusVisibilityOnLoad(formContext) {
   var statusAttribute = formContext.getAttribute("cr4d3_status");
   var assignedToControl = formContext.getControl("header_new_assignedto");

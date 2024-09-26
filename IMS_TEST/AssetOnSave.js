@@ -66,19 +66,13 @@ function onSaveAssetForm(executionContext) {
       console.log("[INFO] Dialog closed. Proceeding with timeline log.");
       if (isNewAsset) {
         var newlyCreatedAssetId = formContext.data.entity.getId();
-        logAssetChangesToTimeline(
-          formContext,
-          isNewAsset,
-          newlyCreatedAssetId
-        ).then(() => refreshTimeline(formContext));
+        logAssetChangesToTimeline(formContext, isNewAsset, newlyCreatedAssetId).then(() => refreshTimeline(formContext));
       } else {
-        logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(() =>
-          refreshTimeline(formContext)
-        );
+        logAssetChangesToTimeline(formContext, isNewAsset, assetId).then(() => refreshTimeline(formContext));
       }
 
-      // Update the initial values after save to reflect the new state
       captureInitialValues(formContext);
+      
     },
     function error() {
       console.error("[ERROR] Error occurred while closing the dialog.");
@@ -101,9 +95,7 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
 
   var notesContent = "";
   var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
-  var deviceIdentifier = formContext
-    .getAttribute("cr4d3_serialnumber")
-    .getValue();
+  var deviceIdentifier = formContext.getAttribute("cr4d3_serialnumber").getValue();
   var modelValue = formContext.getAttribute("cr4d3_model").getValue();
   var modelName = modelValue ? modelValue[0].name : null;
   var categoryValue = formContext.getAttribute("cr4d3_category").getValue();
@@ -116,7 +108,6 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
   var hasChanges = false;
   var subject = "";
 
-  // Check if this is a new asset creation
   if (isNewAsset) {
     console.log("New asset creation detected. Logging all fields.");
     subject = `Asset ${assetCode} Created`;
@@ -135,7 +126,6 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     subject = `Asset ${assetCode} Updated`;
     notesContent += `Asset ${assetCode} updated with the following information:\n\n`;
 
-    // Log only fields that have changed
     if (assetCode && assetCode !== initialAssetCode) {
       notesContent += `Asset Code: ${assetCode}\n`;
       hasChanges = true;
@@ -162,23 +152,21 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
     }
   }
 
-  // Ensure the assetId is formatted correctly
   assetId = assetId.replace("{", "").replace("}", "");
 
-  // If there are no changes, don't create a note
   if (!hasChanges) {
     console.log("No changes detected. Skipping timeline log.");
     return Promise.resolve();
   }
 
-  // Create the note entity
+  
   var note = {
     subject: subject,
     notetext: notesContent,
-    "objectid_cr4d3_asset@odata.bind": `/cr4d3_assets(${assetId})`, // Bind to the asset ID
+    "objectid_cr4d3_asset@odata.bind": `/cr4d3_assets(${assetId})`, 
   };
 
-  // Save the note to the timeline
+  
   return Xrm.WebApi.createRecord("annotation", note).then(
     function success() {
       console.log("Asset changes successfully logged in timeline.");
@@ -194,13 +182,9 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
     `[INFO] Updating inventory based on status change: ${initialStatus} → ${newStatus}`
   );
 
-  // Fetch the model record to get current inventory and units available
-  Xrm.WebApi.retrieveRecord(
-    "cr4d3_model",
-    modelId,
-    "?$select=cr4d3_inventoryquantity,new_available"
-  ).then(
-    function success(result) {
+  Xrm.WebApi.retrieveRecord("cr4d3_model", modelId, "?$select=cr4d3_inventoryquantity,new_available")
+  .then(function success(result) {
+
       var totalInventory = result.cr4d3_inventoryquantity || 0;
       var unitsAvailable = result.new_available || 0;
 
@@ -225,13 +209,9 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
         totalInventory += 1;
       }
 
-      var updateData = {
-        cr4d3_inventoryquantity: totalInventory,
-        new_available: unitsAvailable,
-      };
-
-      Xrm.WebApi.updateRecord("cr4d3_model", modelId, updateData).then(
-        function success() {
+      var updateData = {cr4d3_inventoryquantity: totalInventory,new_available: unitsAvailable,};
+      Xrm.WebApi.updateRecord("cr4d3_model", modelId, updateData).then(function success() 
+        {
           console.log("Model inventory updated successfully.");
         },
         function error(error) {
