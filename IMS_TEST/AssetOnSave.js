@@ -40,7 +40,6 @@ function onSaveAssetForm(executionContext) {
   });
 }
 
-// Helper function to show the success message
 function showSuccessMessage(isNewAsset, assetCode) {
   const successMessage = isNewAsset
     ? {
