@@ -148,6 +148,7 @@ function generateAssetCode(formContext, categoryPrefix) {
       }
 
       var formattedSequence = ("000" + nextSequenceNumber).slice(-3); 
+      var newAssetCode = categoryPrefix + formattedSequence;
 
       console.log(`[INFO] New Asset Code Generated: ${newAssetCode}`);
       formContext.getAttribute("cr4d3_assetcode").setValue(newAssetCode);
