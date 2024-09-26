@@ -130,7 +130,6 @@ function generateAssetCode(formContext, categoryPrefix) {
         existingCodes.push(numericPart);
       });
 
-      // Sort the codes numerically to check for missing numbers
       existingCodes.sort(function (a, b) {
         return a - b;
       });
