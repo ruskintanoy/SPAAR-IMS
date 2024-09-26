@@ -1,29 +1,27 @@
-// AssetOnSave.js
-
 function onSaveAssetForm(executionContext) {
   console.log("[INFO] Saving asset form...");
 
-  var formContext = executionContext.getFormContext();
-  var assetId = formContext.data.entity.getId();
-  var modelLookup = formContext.getAttribute("cr4d3_model").getValue();
-  var assignedToValue = formContext.getAttribute("new_assignedto").getValue();
-  var newStatus = formContext.getAttribute("cr4d3_status").getValue();
-  var assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
+  const formContext = executionContext.getFormContext();
+  const assetId = formContext.data.entity.getId();
+  const modelLookup = formContext.getAttribute("cr4d3_model").getValue();
+  const assignedToValue = formContext.getAttribute("new_assignedto").getValue();
+  const newStatus = formContext.getAttribute("cr4d3_status").getValue();
+  const assetCode = formContext.getAttribute("cr4d3_assetcode").getValue();
 
   if (!modelLookup || modelLookup.length === 0) {
     console.error("[ERROR] No model selected. Cannot update inventory.");
     return;
   }
 
-  var modelId = modelLookup[0].id.replace("{", "").replace("}", "");
-  var newStatusName = newStatus ? newStatus[0].name : null;
+  const modelId = modelLookup[0].id.replace("{", "").replace("}", "");
+  const newStatusName = newStatus ? newStatus[0].name : null;
 
   if (!checkAssignedToRequirement(newStatusName, assignedToValue, executionContext)) {
     return;
   }
 
-  var initialStatus = formContext.getAttribute("new_previousstatus").getValue();
-  var isNewAsset = !assetId;
+  const initialStatus = formContext.getAttribute("new_previousstatus").getValue();
+  const isNewAsset = !assetId;
 
   if (initialStatus !== newStatusName) {
     console.log(`[INFO] Status change detected: ${initialStatus} → ${newStatusName}. Updating inventory.`);
@@ -44,7 +42,7 @@ function onSaveAssetForm(executionContext) {
 
 // Helper function to show the success message
 function showSuccessMessage(isNewAsset, assetCode) {
-  var successMessage = isNewAsset
+  const successMessage = isNewAsset
     ? {
         title: `✅ Asset ${assetCode} Created`,
         text: `New asset created.\nThe asset record has been added to the system.`,
@@ -61,7 +59,6 @@ function showSuccessMessage(isNewAsset, assetCode) {
   });
 }
 
-// Helper function to check assigned-to field requirements
 function checkAssignedToRequirement(newStatusName, assignedToValue, executionContext) {
   if (newStatusName === "Assigned" && !assignedToValue) {
     console.warn("[WARNING] 'Assigned To' field is empty but status is 'Assigned'. Blocking save.");
@@ -75,15 +72,14 @@ function checkAssignedToRequirement(newStatusName, assignedToValue, executionCon
   return true;
 }
 
-// Helper function to open alert dialog
 function openAlertDialog(title, text) {
-  var alertStrings = { confirmButtonLabel: "OK", title: title, text: text };
-  var alertOptions = { height: 240, width: 180 };
+  const alertStrings = { confirmButtonLabel: "OK", title: title, text: text };
+  const alertOptions = { height: 240, width: 180 };
   return Xrm.Navigation.openAlertDialog(alertStrings, alertOptions);
 }
 
 function refreshTimeline(formContext) {
-  var timelineControl = formContext.getControl("Timeline");
+  const timelineControl = formContext.getControl("Timeline");
   if (timelineControl) {
     console.log("[INFO] Refreshing timeline.");
     timelineControl.refresh();
@@ -157,7 +153,6 @@ function logAssetChangesToTimeline(formContext, isNewAsset, assetId) {
 
   assetId = assetId.replace("{", "").replace("}", "");
 
-  // If no changes, don't create a note
   if (!hasChanges) {
     console.log("[INFO] No changes detected. Skipping timeline log.");
     return Promise.resolve();
@@ -184,8 +179,8 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
 
   Xrm.WebApi.retrieveRecord("cr4d3_model", modelId, "?$select=cr4d3_inventoryquantity,new_available")
     .then(function success(result) {
-      var totalInventory = result.cr4d3_inventoryquantity || 0;
-      var unitsAvailable = result.new_available || 0;
+      let totalInventory = result.cr4d3_inventoryquantity || 0;
+      let unitsAvailable = result.new_available || 0;
 
       if (initialStatus === "Assigned" && newStatus === "Stored") unitsAvailable += 1;
       else if (initialStatus === "Assigned" && newStatus === "Retired") totalInventory -= 1;
@@ -202,7 +197,7 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
         unitsAvailable += 1;
       } else if (!initialStatus && newStatus === "Assigned") totalInventory += 1;
 
-      var updateData = { cr4d3_inventoryquantity: totalInventory, new_available: unitsAvailable };
+      const updateData = { cr4d3_inventoryquantity: totalInventory, new_available: unitsAvailable };
 
       Xrm.WebApi.updateRecord("cr4d3_model", modelId, updateData)
         .then(() => console.log("Model inventory updated successfully."))
