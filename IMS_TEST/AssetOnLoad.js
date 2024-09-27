@@ -1,3 +1,5 @@
+
+
 let initialAssetCode = null;
 let initialCategory = null;
 let initialCategoryName = null;

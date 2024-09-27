@@ -1,4 +1,4 @@
-// AssetOnChange.js
+
 
 let originalCategoryId = null;
 let originalAssetCode = null;
