@@ -183,6 +183,13 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
       let totalInventory = result.cr4d3_inventoryquantity || 0;
       let unitsAvailable = result.new_available || 0;
 
+      const originalInventory = totalInventory;
+      const originalAvailable = unitsAvailable;
+
+      console.log(`[DEBUG] Original Inventory: ${originalInventory}, Original Units Available: ${originalAvailable}`);
+      console.log(`[DEBUG] Status Change: ${initialStatus} → ${newStatus}`);
+
+      // Adjust inventory based on status change
       if (initialStatus === "Assigned" && newStatus === "Stored") unitsAvailable += 1;
       else if (initialStatus === "Assigned" && newStatus === "Retired") totalInventory -= 1;
       else if (initialStatus === "Stored" && newStatus === "Assigned") unitsAvailable -= 1;
@@ -198,11 +205,17 @@ function updateInventoryBasedOnStatusChange(modelId, initialStatus, newStatus) {
         unitsAvailable += 1;
       } else if (!initialStatus && newStatus === "Assigned") totalInventory += 1;
 
+      console.log(`[DEBUG] New Inventory: ${totalInventory}, New Units Available: ${unitsAvailable}`);
+      if (originalInventory === totalInventory && originalAvailable === unitsAvailable) {
+        console.log("[INFO] Inventory values remained unchanged after status transition. No update necessary.");
+      }
+
       const updateData = { cr4d3_inventoryquantity: totalInventory, new_available: unitsAvailable };
 
       Xrm.WebApi.updateRecord("cr4d3_model", modelId, updateData)
-        .then(() => console.log("Model inventory updated successfully."))
-        .catch((error) => console.error("Error updating model inventory:", error.message));
+        .then(() => console.log("✅ Model inventory updated successfully."))
+        .catch((error) => console.error("[ERROR] Updating model inventory failed:", error.message));
     })
-    .catch((error) => console.error("Error retrieving model record:", error.message));
+    .catch((error) => console.error("[ERROR] Retrieving model record failed:", error.message));
 }
+
